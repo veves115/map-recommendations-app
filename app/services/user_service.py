@@ -1,4 +1,4 @@
-from unittest import skip
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.user import UserCreate
@@ -25,7 +25,7 @@ class UserService:
         """Crear un nuevo usuario"""
         hashed_password = get_password_hash(user.password)
         db_user = User(
-            user_email=user.email,
+            email=user.email,
             username=user.username,
             hashed_password=hashed_password
         )
@@ -35,8 +35,6 @@ class UserService:
         return db_user
     
     @staticmethod
-    def get_all_users(db: Session) -> list[User]:
+    def get_all_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
         """Obtener todos los usuarios"""
         return db.query(User).offset(skip).limit(limit).all()
-    
-     

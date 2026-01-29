@@ -1,11 +1,12 @@
- fastapi 
- uvicorn[standard] 
- sqlalchemy 
- psycopg2-binary 
- python-jose[cryptography] 
- passlib[bcrypt] 
- python-multipart 
- pydantic-settings 
- googlemaps 
- python-dotenv 
- websockets
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+pydantic-settings
+googlemaps
+python-dotenv
+websockets
+email-validator

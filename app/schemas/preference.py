@@ -6,7 +6,7 @@ class PreferenceBase(BaseModel):
     subcategory: Optional[str] = None  # e.g., comida italiana, arte moderno
     
 class PreferenceCreate(PreferenceBase):
-    pass
+    value: str
 
 class PreferenceResponse(PreferenceBase):
     id: int
