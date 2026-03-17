@@ -10,3 +10,4 @@ googlemaps
 python-dotenv
 websockets
 email-validator
+alembic

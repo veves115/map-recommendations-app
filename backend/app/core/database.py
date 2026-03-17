@@ -4,10 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
 # Crear engine de base de datos
-engine = create_engine(
-    settings.DATABASE_URL,
-    connect_args={"check_same_thread": False}  # Solo para SQLite
-)
+engine = create_engine(settings.DATABASE_URL)
 
 # SessionLocal para interactuar con la BD
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
