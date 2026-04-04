@@ -11,7 +11,7 @@ from app.services.message_service import MessageService
 router = APIRouter(prefix="/messages", tags=["Messages"])
 
 
-@router.get("/{user_id}", response_model=List[MessageResponse])
+@router.get("/{user_id}", response_model=List[MessageResponse],status_code=status.HTTP_200_OK)
 def get_conversation(
     user_id: int,
     db: Session = Depends(get_db),
@@ -22,7 +22,7 @@ def get_conversation(
     ordered chronologically (oldest message first).
 
     - **user_id**: ID of the conversation partner
-    """
+    """ 
     return MessageService.get_conversation(
         db,
         current_user_id=current_user.id,

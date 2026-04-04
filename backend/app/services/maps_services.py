@@ -1,6 +1,9 @@
 import googlemaps
 from typing import List, Dict, Optional
 from app.core.config import settings
+import logging
+
+logger =  logging.getLogger(__name__)
 
 class MapsService:
     def __init__(self):
@@ -66,7 +69,7 @@ class MapsService:
             return places
             
         except Exception as e:
-            print(f"Error al buscar lugares: {e}")
+            logger.error(f"Error: {e}")
             return []
     
     def get_place_details(self, place_id: str) -> Optional[Dict]:
@@ -112,7 +115,7 @@ class MapsService:
             return None
             
         except Exception as e:
-            print(f"Error al obtener detalles del lugar: {e}")
+            logger.error(f"Error: {e}")
             return None
     
     def geocode_address(self, address: str) -> Optional[Dict]:
@@ -141,7 +144,7 @@ class MapsService:
             return None
             
         except Exception as e:
-            print(f"Error al geocodificar dirección: {e}")
+            logger.error(f"Error: {e}")
             return None
 
 # Instancia global del servicio

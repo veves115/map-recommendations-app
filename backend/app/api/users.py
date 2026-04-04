@@ -10,7 +10,7 @@ from app.models.user import User
 router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.get("/", response_model=List[UserResponse])
-def get_users(
+def get_all_users(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
