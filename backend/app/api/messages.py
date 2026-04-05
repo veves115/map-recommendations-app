@@ -14,6 +14,8 @@ router = APIRouter(prefix="/messages", tags=["Messages"])
 @router.get("/{user_id}", response_model=List[MessageResponse],status_code=status.HTTP_200_OK)
 def get_conversation(
     user_id: int,
+    skip: int = 0,
+    limit: int = 20,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
@@ -26,7 +28,9 @@ def get_conversation(
     return MessageService.get_conversation(
         db,
         current_user_id=current_user.id,
-        other_user_id=user_id
+        other_user_id=user_id,
+        skip=skip,
+        limit=limit
     )
 
 

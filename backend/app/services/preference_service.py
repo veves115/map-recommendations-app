@@ -6,9 +6,9 @@ from app.schemas.preference import PreferenceCreate
 
 class PreferenceService:
     @staticmethod
-    def get_user_preferences(db: Session, user_id: int) -> list[Preference]:
+    def get_user_preferences(db: Session, user_id: int, skip: int = 0, limit: int = 20) -> list[Preference]:
         """Returns list of user preferences"""
-        return db.query(Preference).filter(Preference.user_id == user_id).all()
+        return db.query(Preference).filter(Preference.user_id == user_id).offset(skip).limit(limit).all()
 
     @staticmethod
     def get_preference_by_id(db: Session, preference_id: int, user_id: int) -> Preference:

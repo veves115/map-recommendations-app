@@ -10,7 +10,9 @@ class MessageService:
     def get_conversation(
         db: Session,
         current_user_id: int,
-        other_user_id: int
+        other_user_id: int,
+        skip: int = 0,
+        limit: int = 20,
     ) -> List[Message]:
         """
         Returns all messages exchanged between two users, ordered
@@ -36,6 +38,7 @@ class MessageService:
                 )
             )
             .order_by(Message.timestamp.asc())
+            .offset(skip).limit(limit)
             .all()
         )
 
