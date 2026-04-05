@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
 
 from app.core.database import get_db
 from app.core.deps import get_current_active_user
@@ -11,7 +10,7 @@ from app.services.message_service import MessageService
 router = APIRouter(prefix="/messages", tags=["Messages"])
 
 
-@router.get("/{user_id}", response_model=List[MessageResponse],status_code=status.HTTP_200_OK)
+@router.get("/{user_id}", response_model=list[MessageResponse],status_code=status.HTTP_200_OK)
 def get_conversation(
     user_id: int,
     skip: int = 0,

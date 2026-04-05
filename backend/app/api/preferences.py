@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+
 
 from app.core.database import get_db
 from app.core.deps import get_current_active_user
@@ -11,7 +11,7 @@ from app.services.preference_service import PreferenceService
 router = APIRouter(prefix="/preferences", tags=["Preferences"])
 
 
-@router.get("/", response_model=List[PreferenceResponse])
+@router.get("/", response_model=list[PreferenceResponse])
 def list_preferences(
     skip: int = 0,
     limit: int = 20,
