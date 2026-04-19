@@ -6,12 +6,12 @@ const routes = [
     name: 'Login',
     component: () => import('../views/LoginView.vue'),
   },
-  { 
+  {
     path: '/register',
     name: 'Register',
     component: () => import('../views/RegisterView.vue'),
   },
-  { 
+  {
     meta: { requiresAuth: true },
     path: '/',
     name: 'Home',
@@ -36,14 +36,12 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+router.beforeEach((to) => {
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const token = localStorage.getItem('token')
 
   if (requiresAuth && !token) {
-    next('/login')
-  } else {
-    next()
+    return '/login'
   }
 })
 
