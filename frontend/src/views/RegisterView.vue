@@ -43,24 +43,17 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { register } from '@/api/auth'
-import { useAuthStore } from '@/stores/auth'
-import { getMe } from '@/api/auth'
 
 const email = ref('')
 const password = ref('')
 const router = useRouter()
-const authStore = useAuthStore()
 const username = ref('')
 
 const handleRegister = async () => {
   try {
-    const response = await register(email.value, username.value, password.value)
-    const token = response.data.access_token
-    const meResponse = await getMe()
-    authStore.login(token, meResponse.data)
-    router.push('/')
+    await register(email.value, username.value, password.value)
+    router.push('/login')
   } catch (error) {
-    console.error('Error al registrarse:', error)
     alert('Credenciales incorrectas. Por favor, inténtalo de nuevo.')
   }
 }
