@@ -2,7 +2,7 @@ import apiClient from "./client";
 
 //Endpoints de autenticación
 export const register = (email: string, username: string, password: string) => {
-    return apiClient.post('api/v1/auth/register', {
+    return apiClient.post('/auth/register', {
         email,
         username,
         password
@@ -10,13 +10,13 @@ export const register = (email: string, username: string, password: string) => {
 }
 
 export const login = (email: string, password: string) => {
-    return apiClient.post('api/v1/auth/login', {
+    return apiClient.post('/auth/login', {
         email,
         password
     })
 }
 
 export const getMe = () => {
-    return apiClient.get('api/v1/auth/me')
+    return apiClient.get('/auth/me')
 }
 
