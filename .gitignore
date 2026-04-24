@@ -19,3 +19,7 @@ env/
 .idea/
 *.swp
 *.swo
+
+# Local Claude working files (not to be committed)
+CLAUDE.md
+design/
