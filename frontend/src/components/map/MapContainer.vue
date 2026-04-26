@@ -4,9 +4,7 @@ import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import { useGeolocation } from '@vueuse/core'
 import { getNearbyPlaces } from '@/api/maps'
 import type { NearbyPlace } from '@/types/api'
-
-
-
+import { getRecommendations } from '@/api/recommendations'
 
 interface Props {
   center?: { lat: number; lng: number }
@@ -22,11 +20,9 @@ const emit = defineEmits<{
   'place-click': [place: NearbyPlace]
 }>()
 
-
 const mapRef = ref<HTMLDivElement | null>(null)
 let map: any = null
 let markers: any[] = []
-
 
 const { coords, error: geoError } = useGeolocation()
 
@@ -58,38 +54,35 @@ onMounted(async () => {
     zoomControl: true,
   })
 
-  loadPlaces(props.center.lat, props.center.lng)  // ← AÑADIR
+  loadPlaces(props.center.lat, props.center.lng) // ← AÑADIR
 })
-
 
 async function loadPlaces(lat: number, lng: number) {
   if (!map) return
   try {
-    const response = await getNearbyPlaces({
+    const response = await getRecommendations({
       latitude: lat,
       longitude: lng,
-      radius: 1000,
+      radius: 1500,
+      limit: 20,
     })
 
-    markers.forEach(m => m.setMap(null))
+    markers.forEach((m) => m.setMap(null))
     markers = []
 
-    response.data.forEach(place => {
-  const marker = new google.maps.Marker({
-    position: place.location,
-    map,
-    title: place.name,
-  })
-  marker.addListener('click', () => emit('place-click', place))  // ← AÑADIR
-  markers.push(marker)
-})
-
+    response.data.forEach((place) => {
+      const marker = new google.maps.Marker({
+        position: place.location,
+        map,
+        title: place.name,
+      })
+      marker.addListener('click', () => emit('place-click', place)) // ← AÑADIR
+      markers.push(marker)
+    })
   } catch (err) {
     console.error('Error cargando lugares cercanos:', err)
   }
 }
-
-
 </script>
 
 <template>

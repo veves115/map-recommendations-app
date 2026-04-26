@@ -1,6 +1,12 @@
 <template>
   <div class="w-screen h-screen relative">
     <MapContainer @place-click="handlePlaceClick" />
+    <UserMenu />
+  </div>
+
+  <!-- Card flotante de detalles (queda igual) -->
+  ...
+
 
     <!-- Card flotante de detalles -->
     <div
@@ -38,7 +44,6 @@
         </p>
       </BaseCard>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -47,6 +52,8 @@ import MapContainer from '@/components/map/MapContainer.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import { getPlaceDetails } from '@/api/maps'
 import type { NearbyPlace, PlaceDetails } from '@/types/api'
+import UserMenu from '@/components/layout/UserMenu.vue'
+
 
 const placeDetails = ref<PlaceDetails | null>(null)
 
