@@ -48,8 +48,6 @@ import CanvasRevealEffect from '@/components/ui/CanvasRevealEffect.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 
-
-
 const email = ref('')
 const password = ref('')
 const router = useRouter()
@@ -64,8 +62,10 @@ const handleLogin = async () => {
   try {
     const response = await login(email.value, password.value)
     const token = response.data.access_token
+    localStorage.setItem('token', token) // ← AÑADIR esta línea
     const meResponse = await getMe()
     authStore.login(token, meResponse.data)
+
     router.push('/')
   } catch (e: any) {
     console.error('Error al iniciar sesión:', e)

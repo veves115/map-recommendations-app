@@ -43,3 +43,49 @@ export interface Recommendation {
     vicinity: string
     types: string[]
 }
+
+export interface LatLng {
+  lat: number
+  lng: number
+}
+
+export interface NearbyPlace {
+  place_id: string
+  name: string
+  address: string | null
+  types: string[]
+  rating: number | null
+  user_ratings_total: number | null
+  location: LatLng
+  open_now: boolean | null
+  photos: string[]
+}
+
+export interface PlaceReview {
+  author: string
+  rating: number
+  text: string
+  time: number
+}
+
+export interface PlaceDetails {
+  place_id: string
+  name: string
+  formatted_address: string | null
+  phone: string | null
+  website: string | null
+  rating: number | null
+  user_ratings_total: number | null
+  price_level: number | null
+  types: string[]
+  location: LatLng
+  opening_hours: string[] | null
+  reviews: PlaceReview[]
+}
+
+export interface GeocodeResult {
+  formatted_address: string
+  location: LatLng
+  place_id: string
+}
+
