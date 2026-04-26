@@ -36,14 +36,12 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const token = localStorage.getItem('token')
 
   if (requiresAuth && !token) {
-    next('/login')
-  } else {
-    next()
+    return '/login'
   }
 })
 
