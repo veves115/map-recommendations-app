@@ -2,9 +2,8 @@
 import { ref, onMounted, watch } from 'vue'
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import { useGeolocation } from '@vueuse/core'
-import { getNearbyPlaces } from '@/api/maps'
-import type { NearbyPlace } from '@/types/api'
 import { getRecommendations } from '@/api/recommendations'
+import type { NearbyPlace } from '@/types/api'
 
 interface Props {
   center?: { lat: number; lng: number }
@@ -23,6 +22,7 @@ const emit = defineEmits<{
 const mapRef = ref<HTMLDivElement | null>(null)
 let map: any = null
 let markers: any[] = []
+let AdvancedMarker: any = null
 
 const { coords, error: geoError } = useGeolocation()
 
@@ -46,19 +46,22 @@ onMounted(async () => {
   })
 
   const { Map } = await importLibrary('maps')
+  const markerLib = await importLibrary('marker') as any
+  AdvancedMarker = markerLib.AdvancedMarkerElement
 
   map = new Map(mapRef.value, {
+    mapId: 'DEMO_MAP_ID',
     center: props.center,
     zoom: props.zoom,
     disableDefaultUI: true,
     zoomControl: true,
   })
 
-  loadPlaces(props.center.lat, props.center.lng) // ← AÑADIR
+  loadPlaces(props.center.lat, props.center.lng)
 })
 
 async function loadPlaces(lat: number, lng: number) {
-  if (!map) return
+  if (!map || !AdvancedMarker) return
   try {
     const response = await getRecommendations({
       latitude: lat,
@@ -67,16 +70,16 @@ async function loadPlaces(lat: number, lng: number) {
       limit: 20,
     })
 
-    markers.forEach((m) => m.setMap(null))
+    markers.forEach(m => { m.map = null })
     markers = []
 
-    response.data.forEach((place) => {
-      const marker = new google.maps.Marker({
+    response.data.forEach(place => {
+      const marker = new AdvancedMarker({
         position: place.location,
         map,
         title: place.name,
       })
-      marker.addListener('click', () => emit('place-click', place)) // ← AÑADIR
+      marker.addListener('gmp-click', () => emit('place-click', place))
       markers.push(marker)
     })
   } catch (err) {

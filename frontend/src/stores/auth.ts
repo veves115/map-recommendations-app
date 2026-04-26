@@ -1,5 +1,6 @@
 import type { User } from '@/types/api'
 import { defineStore } from 'pinia'
+import { getMe } from '@/api/auth'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -20,10 +21,18 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       localStorage.removeItem('token')
     },
-    loadFromStorage() {
+    async loadFromStorage() {
       const token = localStorage.getItem('token')
-      if (token) {
-        this.token = token
+      if (!token) return
+
+      this.token = token
+
+      try {
+        const response = await getMe()
+        this.user = response.data
+      } catch (err) {
+        // Token expirado o inválido → cerrar sesión
+        this.logout()
       }
     },
   },

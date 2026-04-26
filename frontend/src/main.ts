@@ -8,7 +8,7 @@ import router from './router'
 
 const app = createApp(App)
 app.use(createPinia())
-useAuthStore().loadFromStorage()
+await useAuthStore().loadFromStorage()
 app.use(router)
 app.use(MotionPlugin)
 app.mount('#app')

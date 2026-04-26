@@ -123,7 +123,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { getMe } from '@/api/auth'
 import { listUsers } from '@/api/users'
 import { useChat } from '@/composables/useChat'
 import type { User, Message } from '@/types/api'
@@ -166,10 +165,6 @@ watch(messages, async () => {
 
 onMounted(async () => {
   try {
-    if (!authStore.user) {
-      const meResponse = await getMe()
-      authStore.user = meResponse.data
-    }
     const response = await listUsers()
     users.value = response.data
   } catch (err) {

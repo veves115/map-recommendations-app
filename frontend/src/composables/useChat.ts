@@ -28,7 +28,8 @@ export function useChat(otherUserId: Ref<number | null>) {
     if (!authStore.user || !authStore.token) return
 
     const roomId = buildRoomId(authStore.user.id, otherId)
-    const url = `ws://localhost:8000/ws/chat/${roomId}?token=${authStore.token}`
+    const wsUrl = import.meta.env.VITE_API_URL.replace(/^http/, 'ws')
+    const url = `${wsUrl}/ws/chat/${roomId}?token=${authStore.token}`
 
     ws = new WebSocket(url)
 
@@ -57,10 +58,12 @@ export function useChat(otherUserId: Ref<number | null>) {
 
   function send(content: string) {
     if (!otherUserId.value || !ws || ws.readyState !== WebSocket.OPEN) return
-    ws.send(JSON.stringify({
-      receiver_id: otherUserId.value,
-      content,
-    }))
+    ws.send(
+      JSON.stringify({
+        receiver_id: otherUserId.value,
+        content,
+      }),
+    )
   }
 
   // Reaccionar a cambios del otro usuario

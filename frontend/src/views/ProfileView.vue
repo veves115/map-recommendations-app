@@ -128,7 +128,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { getMe } from '@/api/auth'
 import type { Preference } from '@/types/api'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import UserMenu from '@/components/layout/UserMenu.vue'
@@ -143,12 +142,6 @@ const loading = ref(true)
 
 onMounted(async () => {
   try {
-    // Si no tenemos user (refresh directo en /profile), pídelo
-    if (!authStore.user) {
-      const meResponse = await getMe()
-      authStore.user = meResponse.data
-    }
-
     const response = await listPreferences()
     preferences.value = response.data
   } catch (err) {
