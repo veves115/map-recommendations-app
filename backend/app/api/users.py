@@ -10,14 +10,14 @@ from app.models.user import User
 router = APIRouter(prefix="/users", tags=["Users"])
 
 @router.get("/", response_model=List[UserResponse])
-def get_users(
+def get_all_users(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
     """Obtener lista de usuarios"""
-    users = UserService.get_users(db=db, skip=skip, limit=limit)
+    users = UserService.get_all_users(db=db, skip=skip, limit=limit)
     return users
 
 @router.get("/{user_id}", response_model=UserResponse)

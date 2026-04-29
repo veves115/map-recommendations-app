@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import auth, users, maps
 from app.api import preferences, locations, recommendations, messages
 from app.websocket.chat import router as ws_router
+from sqlalchemy import text
+from app.core import database
 
 
 app = FastAPI(
@@ -33,7 +35,7 @@ app.include_router(ws_router)
 @app.get("/")
 def read_root():
     return {
-        "message": "holaaaaaaaaaa",
+        "message": "Bienvenido a mi app",
         "status": "running",
         "version": "1.0.0"
     }
@@ -41,4 +43,11 @@ def read_root():
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "database": "connected"}
+    db = next(database.get_db())
+    try:
+        db.execute(text("SELECT 1"))
+        db_status = "connected"
+    except Exception:
+        db_status = "disconnected"
+    return {"status": "healthy", "database": db_status}
+        

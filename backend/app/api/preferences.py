@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+
 
 from app.core.database import get_db
 from app.core.deps import get_current_active_user
@@ -11,8 +11,10 @@ from app.services.preference_service import PreferenceService
 router = APIRouter(prefix="/preferences", tags=["Preferences"])
 
 
-@router.get("/", response_model=List[PreferenceResponse])
+@router.get("/", response_model=list[PreferenceResponse])
 def list_preferences(
+    skip: int = 0,
+    limit: int = 20,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
@@ -21,7 +23,7 @@ def list_preferences(
 
     Returns every category / subcategory pair the user has saved.
     """
-    return PreferenceService.get_user_preferences(db, current_user.id)
+    return PreferenceService.get_user_preferences(db, current_user.id, skip=skip, limit=limit)
 
 
 @router.post("/", response_model=PreferenceResponse, status_code=status.HTTP_201_CREATED)

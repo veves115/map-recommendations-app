@@ -6,6 +6,10 @@ from app.services.user_service import UserService
 from app.services.message_service import MessageService
 from app.schemas.message import MessageCreate
 from app.websocket.manager import manager
+from app.services.user_service import UserService
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ws", tags=["WebSocket"])
 
@@ -93,7 +97,13 @@ async def websocket_chat(
                     json.dumps({"error": "No puedes enviarte un mensaje a ti mismo"})
                 )
                 continue
-
+            
+            UserService.get_user_by_id(db,receiver_id)
+            receiver  = UserService.get_user_by_id(db,receiver_id)
+            if not receiver:
+                await websocket.send_text(json.dumps({"error": "Usuario receptor no existe"}))
+                continue
+            
             # Persist
             msg = MessageService.create_message(
                 db,
