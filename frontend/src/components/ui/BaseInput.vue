@@ -1,5 +1,6 @@
 <script setup lang="ts">
 interface Props {
+  id?: string
   type?: string
   placeholder?: string
   label?: string
@@ -8,6 +9,7 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
+  id:'',
   type: 'text',
   placeholder: '',
   label: '',
@@ -23,6 +25,7 @@ const model = defineModel<string>()
     <!-- label opcional arriba -->
     <label
       v-if="label"
+      :for="id || undefined"
       class="block text-sm text-white/70 mb-2"
     >
       {{ label }}
@@ -39,10 +42,11 @@ const model = defineModel<string>()
 
       <input
         v-model="model"
+        :id="id || undefined"
         :type="type"
         :placeholder="placeholder"
         :disabled="disabled"
-        class="w-full backdrop-blur-[1px] text-white text-center
+        class="w-full backdrop-blur-[1px] text-white
                border border-white/10 rounded-full py-3 px-4
                bg-transparent placeholder:text-white/40
                focus:outline-none focus:border-white/30

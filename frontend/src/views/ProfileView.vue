@@ -58,7 +58,7 @@
             <button
               type="button"
               class="text-white/40 hover:text-red-400 transition-colors text-base leading-none"
-              @click="handleDelete(pref.id)"
+              @click="askDelete(pref.id)"
               aria-label="Eliminar preferencia"
             >
               ×
@@ -123,6 +123,15 @@
       </BaseCard>
     </div>
   </div>
+  <ConfirmDialog
+  v-model:open="confirmOpen"
+  title="¿Eliminar preferencia?"
+  message="Esta acción no se puede deshacer."
+  confirm-text="Eliminar"
+  variant="danger"
+  :loading="deleting"
+  @confirm="handleDelete"
+/>
 </template>
 
 <script setup lang="ts">
@@ -135,10 +144,15 @@ import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headless
 import { listPreferences, createPreference, deletePreference } from '@/api/preferences'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
+import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
+
 
 const authStore = useAuthStore()
 const preferences = ref<Preference[]>([])
 const loading = ref(true)
+const confirmOpen = ref(false)
+const prefIdToDelete = ref<number | null>(null)
+const deleting = ref(false)
 
 onMounted(async () => {
   try {
@@ -165,7 +179,7 @@ const PLACE_CATEGORIES = [
   { value: 'book_store', label: 'Librerías' },
 ]
 
-const newCategory = ref(PLACE_CATEGORIES[0])
+const newCategory = ref(PLACE_CATEGORIES[0]!)
 const newSubcategory = ref('')
 const adding = ref(false)
 const addError = ref('')
@@ -186,12 +200,24 @@ async function handleAdd() {
     adding.value = false
   }
 }
-async function handleDelete(id: number) {
+async function handleDelete() {
+  if (prefIdToDelete.value === null) return
+  deleting.value = true
   try {
-    await deletePreference(id)
-    preferences.value = preferences.value.filter((p) => p.id !== id)
+    await deletePreference(prefIdToDelete.value)
+    preferences.value = preferences.value.filter((p) => p.id !== prefIdToDelete.value)
+    confirmOpen.value = false
+    prefIdToDelete.value = null
   } catch (err) {
     console.error('Error eliminando preferencia:', err)
+  } finally {
+    deleting.value = false
   }
 }
+
+function askDelete(id: number) {
+  prefIdToDelete.value = id
+  confirmOpen.value = true
+}
+
 </script>
