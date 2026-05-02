@@ -4,16 +4,21 @@ import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import { useGeolocation } from '@vueuse/core'
 import { getRecommendations } from '@/api/recommendations'
 import type { NearbyPlace } from '@/types/api'
+import { getNearbyPlaces } from '@/api/maps'
+
 
 interface Props {
   center?: { lat: number; lng: number }
   zoom?: number
+  placeType?: string | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  center: () => ({ lat: 40.4168, lng: -3.7038 }), // Madrid por defecto
+  center: () => ({ lat: 40.4168, lng: -3.7038 }),
   zoom: 14,
+  placeType: null,
 })
+
 
 const emit = defineEmits<{
   'place-click': [place: NearbyPlace]
@@ -59,6 +64,14 @@ watch(
   },
 )
 
+watch(() => props.placeType, () => {
+  if (!map) return
+  const center = map.getCenter()
+  if (!center) return
+  loadPlaces(center.lat(), center.lng())
+})
+
+
 
 onMounted(async () => {
   if (!mapRef.value) return
@@ -88,19 +101,24 @@ onMounted(async () => {
 async function loadPlaces(lat: number, lng: number) {
   if (!map || !AdvancedMarker) return
   try {
-    const response = await getRecommendations({
-      latitude: lat,
-      longitude: lng,
-      radius: 1500,
-      limit: 20,
-    })
+    const response = props.placeType
+      ? await getNearbyPlaces({
+          latitude: lat,
+          longitude: lng,
+          radius: 1500,
+          place_type: props.placeType,
+        })
+      : await getRecommendations({
+          latitude: lat,
+          longitude: lng,
+          radius: 1500,
+          limit: 20,
+        })
 
-    markers.forEach((m) => {
-      m.map = null
-    })
+    markers.forEach(m => { m.map = null })
     markers = []
 
-    response.data.forEach((place) => {
+    response.data.forEach(place => {
       const marker = new AdvancedMarker({
         position: place.location,
         map,
@@ -112,6 +130,11 @@ async function loadPlaces(lat: number, lng: number) {
   } catch (err) {
     console.error('Error cargando lugares cercanos:', err)
   }
+}
+interface Props {
+  center?: { lat: number; lng: number }
+  zoom?: number
+  placeType?: string | null
 }
 </script>
 

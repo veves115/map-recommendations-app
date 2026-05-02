@@ -1,11 +1,25 @@
 <template>
   <div class="w-screen h-screen relative">
-    <MapContainer @place-click="handlePlaceClick" />
+    <MapContainer :place-type="activeFilter" @place-click="handlePlaceClick" />
+    <div class="absolute top-4 left-4 right-20 z-10 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <button
+        v-for="filter in PLACE_FILTERS"
+        :key="filter.value ?? 'all'"
+        type="button"
+        :class="[
+          'px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors flex-shrink-0',
+          activeFilter === filter.value
+            ? 'bg-white text-black'
+            : 'bg-black/80 text-white border border-white/20 hover:bg-black/90 backdrop-blur-md',
+        ]"
+        @click="activeFilter = filter.value"
+      >
+        {{ filter.label }}
+      </button>
+    </div>
     <UserMenu />
   </div>
-
-  <!-- Card flotante de detalles (queda igual) -->
-  ...
+  
   <!-- Card flotante de detalles -->
   <div
     v-if="placeDetails"
@@ -91,7 +105,20 @@ import { getPlaceDetails } from '@/api/maps'
 import type { NearbyPlace, PlaceDetails } from '@/types/api'
 import UserMenu from '@/components/layout/UserMenu.vue'
 
+
 const placeDetails = ref<PlaceDetails | null>(null)
+
+const PLACE_FILTERS = [
+  { value: null, label: 'Todo' },
+  { value: 'restaurant', label: 'Restaurantes' },
+  { value: 'cafe', label: 'Cafés' },
+  { value: 'bar', label: 'Bares' },
+  { value: 'museum', label: 'Museos' },
+  { value: 'park', label: 'Parques' },
+  { value: 'tourist_attraction', label: 'Turismo' },
+]
+
+const activeFilter = ref<string | null>(null)
 
 const handlePlaceClick = async (place: NearbyPlace) => {
   try {
