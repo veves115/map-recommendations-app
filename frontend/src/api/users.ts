@@ -17,3 +17,8 @@ export interface UserUpdate {
 export const updateMe = (data: UserUpdate) => {
   return apiClient.patch<User>('api/v1/users/me', data)
 }
+
+export const deleteMe = () => {
+  return apiClient.delete('api/v1/users/me')
+}
+

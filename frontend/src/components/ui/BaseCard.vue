@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-type Variant = 'flat' | 'elevated' | 'glass' | 'solid'
+type Variant = 'flat' | 'elevated' | 'glass' | 'solid' | 'danger'
 type Padding = 'none' | 'sm' | 'md' | 'lg'
 
 interface Props {
@@ -21,6 +21,7 @@ const variantClasses: Record<Variant, string> = {
   elevated: 'bg-white/[0.08] border border-white/15 shadow-card',
   glass: 'bg-white/5 backdrop-blur-md border border-white/10',
   solid: 'bg-black/80 backdrop-blur-md border border-white/10 shadow-card',
+  danger: 'bg-zinc-950 border border-red-500/30',
 }
 
 const paddingClasses: Record<Padding, string> = {

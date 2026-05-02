@@ -214,6 +214,19 @@
           </BaseButton>
         </form>
       </BaseCard>
+      <!-- Zona de peligro -->
+  <BaseCard variant="danger">
+    <template #header>
+      <h2 class="text-lg font-semibold text-red-400">Zona de peligro</h2>
+    </template>
+
+    <p class="text-sm text-white/60 mb-4">
+      Eliminar tu cuenta desactivará el acceso inmediatamente y deberás contactar con soporte para
+      recuperarla.
+    </p>
+
+    <BaseButton variant="danger" @click="deleteOpen = true"> Eliminar mi cuenta </BaseButton>
+  </BaseCard>
     </div>
   </div>
   <ConfirmDialog
@@ -224,6 +237,15 @@
     variant="danger"
     :loading="deleting"
     @confirm="handleDelete"
+  />
+  <ConfirmDialog
+    v-model:open="deleteOpen"
+    title="¿Eliminar cuenta?"
+    message="Tu cuenta se desactivará. Perderás acceso inmediatamente y necesitarás contactar a soporte para reactivarla."
+    confirm-text="Eliminar cuenta"
+    variant="danger"
+    :loading="deletingAccount"
+    @confirm="handleDeleteAccount"
   />
 </template>
 
@@ -240,6 +262,13 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import { updateMe } from '@/api/users'
 import { changePassword } from '@/api/auth'
+import { useRouter } from 'vue-router'
+import { deleteMe } from '@/api/users'
+
+const router = useRouter()
+
+const deleteOpen = ref(false)
+const deletingAccount = ref(false)
 
 const isChangingPassword = ref(false)
 const passwordForm = ref({
@@ -433,6 +462,18 @@ async function savePasswordChange() {
     passwordError.value = formatApiError(e, 'No se pudo cambiar la contraseña')
   } finally {
     changingPassword.value = false
+  }
+}
+
+async function handleDeleteAccount() {
+  deletingAccount.value = true
+  try {
+    await deleteMe()
+    authStore.logout()
+    router.push('/login')
+  } catch (err) {
+    console.error('Error eliminando cuenta:', err)
+    deletingAccount.value = false
   }
 }
 </script>
