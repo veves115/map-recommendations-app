@@ -131,13 +131,32 @@ async function loadPlaces(lat: number, lng: number) {
     console.error('Error cargando lugares cercanos:', err)
   }
 }
-interface Props {
-  center?: { lat: number; lng: number }
-  zoom?: number
-  placeType?: string | null
+function handleRecenter() {
+  if (!map) return
+  if (geoError.value) return
+  const lat = coords.value.latitude
+  const lng = coords.value.longitude
+  if (lat === 0 && lng === 0) return
+  map.setCenter({ lat, lng })
+  map.setZoom(15)
 }
 </script>
 
 <template>
-  <div ref="mapRef" class="w-full h-full" />
+  <div class="relative w-full h-full">
+    <div ref="mapRef" class="w-full h-full" />
+
+    <button
+      type="button"
+      class="absolute bottom-6 right-6 w-12 h-12 rounded-full
+             bg-black/80 backdrop-blur-md border border-white/20
+             text-white flex items-center justify-center
+             shadow-card hover:bg-black/90 transition-colors z-10"
+      title="Centrar en mi ubicación"
+      @click="handleRecenter"
+    >
+      <span class="text-xl">📍</span>
+    </button>
+  </div>
 </template>
+
