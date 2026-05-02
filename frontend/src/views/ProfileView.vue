@@ -148,14 +148,14 @@
               {{ pref.category }}
               <span v-if="pref.subcategory" class="text-white/60"> · {{ pref.subcategory }} </span>
             </span>
-            <button
-              type="button"
-              class="text-white/40 hover:text-red-400 transition-colors text-base leading-none"
-              @click="askDelete(pref.id)"
+            <BaseIconButton
+              variant="danger"
+              size="sm"
               aria-label="Eliminar preferencia"
+              @click="askDelete(pref.id)"
             >
               ×
-            </button>
+            </BaseIconButton>
           </li>
         </ul>
       </BaseCard>
@@ -215,18 +215,18 @@
         </form>
       </BaseCard>
       <!-- Zona de peligro -->
-  <BaseCard variant="danger">
-    <template #header>
-      <h2 class="text-lg font-semibold text-red-400">Zona de peligro</h2>
-    </template>
+      <BaseCard variant="danger">
+        <template #header>
+          <h2 class="text-lg font-semibold text-red-400">Zona de peligro</h2>
+        </template>
 
-    <p class="text-sm text-white/60 mb-4">
-      Eliminar tu cuenta desactivará el acceso inmediatamente y deberás contactar con soporte para
-      recuperarla.
-    </p>
+        <p class="text-sm text-white/60 mb-4">
+          Eliminar tu cuenta desactivará el acceso inmediatamente y deberás contactar con soporte
+          para recuperarla.
+        </p>
 
-    <BaseButton variant="danger" @click="deleteOpen = true"> Eliminar mi cuenta </BaseButton>
-  </BaseCard>
+        <BaseButton variant="danger" @click="deleteOpen = true"> Eliminar mi cuenta </BaseButton>
+      </BaseCard>
     </div>
   </div>
   <ConfirmDialog
@@ -264,6 +264,8 @@ import { updateMe } from '@/api/users'
 import { changePassword } from '@/api/auth'
 import { useRouter } from 'vue-router'
 import { deleteMe } from '@/api/users'
+import BaseIconButton from '@/components/ui/BaseIconButton.vue'
+
 
 const router = useRouter()
 
