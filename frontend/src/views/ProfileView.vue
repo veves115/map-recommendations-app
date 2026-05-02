@@ -14,10 +14,21 @@
       <!-- User info -->
       <BaseCard variant="glass">
         <template #header>
-          <h2 class="text-lg font-semibold">Cuenta</h2>
+          <div class="flex justify-between items-center">
+            <h2 class="text-lg font-semibold">Cuenta</h2>
+            <button
+              v-if="!isEditing"
+              type="button"
+              class="text-sm text-white/60 hover:text-white transition-colors"
+              @click="startEdit"
+            >
+              Editar
+            </button>
+          </div>
         </template>
 
-        <div class="space-y-2 text-sm">
+        <!-- Modo view -->
+        <div v-if="!isEditing" class="space-y-2 text-sm">
           <div>
             <span class="text-white/60">Nombre de usuario: </span>
             <span>{{ authStore.user?.username || '—' }}</span>
@@ -26,7 +37,25 @@
             <span class="text-white/60">Email: </span>
             <span>{{ authStore.user?.email || '—' }}</span>
           </div>
+          <p v-if="saveSuccess" class="text-sm text-green-400 mt-2">✓ Guardado correctamente</p>
         </div>
+
+        <!-- Modo edit -->
+        <form v-else @submit.prevent="saveEdit" class="space-y-4">
+          <BaseInput v-model="editForm.username" label="Nombre de usuario" id="edit-username" />
+          <BaseInput v-model="editForm.email" type="email" label="Email" id="edit-email" />
+
+          <p v-if="saveError" class="text-sm text-red-400">
+            {{ saveError }}
+          </p>
+
+          <div class="flex gap-2 justify-end">
+            <BaseButton type="button" variant="ghost" :disabled="saving" @click="cancelEdit">
+              Cancelar
+            </BaseButton>
+            <BaseButton type="submit" variant="primary" :loading="saving"> Guardar </BaseButton>
+          </div>
+        </form>
       </BaseCard>
 
       <!-- Preferences -->
@@ -124,14 +153,14 @@
     </div>
   </div>
   <ConfirmDialog
-  v-model:open="confirmOpen"
-  title="¿Eliminar preferencia?"
-  message="Esta acción no se puede deshacer."
-  confirm-text="Eliminar"
-  variant="danger"
-  :loading="deleting"
-  @confirm="handleDelete"
-/>
+    v-model:open="confirmOpen"
+    title="¿Eliminar preferencia?"
+    message="Esta acción no se puede deshacer."
+    confirm-text="Eliminar"
+    variant="danger"
+    :loading="deleting"
+    @confirm="handleDelete"
+  />
 </template>
 
 <script setup lang="ts">
@@ -145,8 +174,13 @@ import { listPreferences, createPreference, deletePreference } from '@/api/prefe
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
+import { updateMe } from '@/api/users'
 
-
+const isEditing = ref(false)
+const editForm = ref({ username: '', email: '' })
+const saving = ref(false)
+const saveError = ref('')
+const saveSuccess = ref(false)
 const authStore = useAuthStore()
 const preferences = ref<Preference[]>([])
 const loading = ref(true)
@@ -220,4 +254,69 @@ function askDelete(id: number) {
   confirmOpen.value = true
 }
 
+function startEdit() {
+  editForm.value = {
+    username: authStore.user?.username ?? '',
+    email: authStore.user?.email ?? '',
+  }
+  saveError.value = ''
+  saveSuccess.value = false
+  isEditing.value = true
+}
+
+function cancelEdit() {
+  isEditing.value = false
+  saveError.value = ''
+}
+const typeMessages: Record<string, string> = {
+  string_pattern_mismatch: 'Solo se permiten letras, números, guiones bajos y guiones medios.',
+  string_too_short: 'Demasiado corto.',
+  string_too_long: 'Demasiado largo.',
+  value_error: 'Valor no válido.',
+  missing: 'Campo obligatorio.',
+}
+
+function formatApiError(e: any, fallback: string): string {
+  const detail = e?.response?.data?.detail
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    return detail.map((err) => typeMessages[err.type] ?? err.msg).join(', ')
+  }
+  return fallback
+}
+
+async function saveEdit() {
+  if (!authStore.user) return
+
+  // Construir payload solo con campos que cambiaron
+  const payload: { username?: string; email?: string } = {}
+  if (editForm.value.username !== authStore.user.username) {
+    payload.username = editForm.value.username
+  }
+  if (editForm.value.email !== authStore.user.email) {
+    payload.email = editForm.value.email
+  }
+
+  // Si no hay cambios, simplemente cerrar
+  if (Object.keys(payload).length === 0) {
+    isEditing.value = false
+    return
+  }
+
+  saving.value = true
+  saveError.value = ''
+  try {
+    const response = await updateMe(payload)
+    authStore.updateUser(response.data)
+    isEditing.value = false
+    saveSuccess.value = true
+    setTimeout(() => {
+      saveSuccess.value = false
+    }, 3000)
+  } catch (e: any) {
+    saveError.value = formatApiError(e, 'No se pudo actualizar')
+  } finally {
+    saving.value = false
+  }
+}
 </script>
