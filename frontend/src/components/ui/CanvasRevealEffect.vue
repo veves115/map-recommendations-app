@@ -22,56 +22,56 @@ const props = withDefaults(defineProps<Props>(), {
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 
-
 let renderer: THREE.WebGLRenderer | null = null
 let animationFrameId: number | null = null
-
 
 onMounted(() => {
   if (!canvasRef.value) return
   const canvas = canvasRef.value
 
-// Configurar renderer
-renderer = new THREE.WebGLRenderer({ canvas, alpha: true })
-renderer.setSize(canvas.clientWidth, canvas.clientHeight, false)
-renderer.setPixelRatio(window.devicePixelRatio)
+  // Configurar renderer
+  renderer = new THREE.WebGLRenderer({ canvas, alpha: true })
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false)
+  renderer.setPixelRatio(window.devicePixelRatio)
 
-const scene = new THREE.Scene()
-const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
+  const scene = new THREE.Scene()
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
 
-function buildColors(colors: number[][]): THREE.Vector3[] {
-  // Paso 1: expandir a 6 colores según cuántos entren
-  let expanded: number[][]
-  
-  if (colors.length === 2) {
-    expanded = [colors[0], colors[0], colors[0], colors[1], colors[1], colors[1]]
-  } else if (colors.length === 3) {
-    expanded = [colors[0], colors[0], colors[1], colors[1], colors[2], colors[2]]
-  } else {
-    // 1 color (o cualquier otro caso): repetir 6 veces
-    expanded = [colors[0], colors[0], colors[0], colors[0], colors[0], colors[0]]
+  function buildColors(colors: number[][]): THREE.Vector3[] {
+    // Paso 1: expandir a 6 colores según cuántos entren
+    let expanded: number[][]
+
+    if (colors.length === 2) {
+      expanded = [colors[0]!, colors[0]!, colors[0]!, colors[1]!, colors[1]!, colors[1]!]
+    } else if (colors.length === 3) {
+      expanded = [colors[0]!, colors[0]!, colors[1]!, colors[1]!, colors[2]!, colors[2]!]
+    } else {
+      // 1 color (o cualquier otro caso): repetir 6 veces
+      expanded = [colors[0]!, colors[0]!, colors[0]!, colors[0]!, colors[0]!, colors[0]!]
+    }
+
+    // Paso 2: convertir cada [R, G, B] a THREE.Vector3 normalizado
+    return expanded.map(
+      (color) => new THREE.Vector3(color[0]! / 255, color[1]! / 255, color[2]! / 255),
+    )
   }
-
-  // Paso 2: convertir cada [R, G, B] a THREE.Vector3 normalizado
-  return expanded.map(color =>
-    new THREE.Vector3(color[0] / 255, color[1] / 255, color[2] / 255)
-  )
-}
-const colorVectors = buildColors(props.colors)
-const uniforms = {
-  u_time:       { value: 0 },
-  u_resolution: { value: new THREE.Vector2(
-    canvas.clientWidth * window.devicePixelRatio,
-    canvas.clientHeight * window.devicePixelRatio
-  )},
-  u_colors:     { value: colorVectors },
-  u_opacities:  { value: props.opacities },
-  u_total_size: { value: 20 },
-  u_dot_size:   { value: props.dotSize },
-  u_reverse:    { value: props.reverse ? 1 : 0 },
-}
-const material = new THREE.ShaderMaterial({
-  vertexShader: `precision mediump float;
+  const colorVectors = buildColors(props.colors)
+  const uniforms = {
+    u_time: { value: 0 },
+    u_resolution: {
+      value: new THREE.Vector2(
+        canvas.clientWidth * window.devicePixelRatio,
+        canvas.clientHeight * window.devicePixelRatio,
+      ),
+    },
+    u_colors: { value: colorVectors },
+    u_opacities: { value: props.opacities },
+    u_total_size: { value: 20 },
+    u_dot_size: { value: props.dotSize },
+    u_reverse: { value: props.reverse ? 1 : 0 },
+  }
+  const material = new THREE.ShaderMaterial({
+    vertexShader: `precision mediump float;
 in vec2 coordinates;
 uniform vec2 u_resolution;
 out vec2 fragCoord;
@@ -80,7 +80,7 @@ void main(){
   fragCoord = (position.xy + vec2(1.0)) * 0.5 * u_resolution;
   fragCoord.y = u_resolution.y - fragCoord.y;
 }`,
-  fragmentShader: `precision mediump float;
+    fragmentShader: `precision mediump float;
 in vec2 fragCoord;
 
 uniform float u_time;
@@ -142,47 +142,45 @@ fragColor.rgb *= fragColor.a;
 
 }
 `,
-  uniforms,
-  glslVersion: THREE.GLSL3,
-  blending: THREE.CustomBlending,
-  blendSrc: THREE.SrcAlphaFactor,
-  blendDst: THREE.OneFactor,
+    uniforms,
+    glslVersion: THREE.GLSL3,
+    blending: THREE.CustomBlending,
+    blendSrc: THREE.SrcAlphaFactor,
+    blendDst: THREE.OneFactor,
+  })
+  const geometry = new THREE.PlaneGeometry(2, 2)
+  const mesh = new THREE.Mesh(geometry, material)
+  scene.add(mesh)
+
+  const timer = new THREE.Timer()
+
+  const animate = () => {
+    if (!renderer) return
+    timer.update()
+    if (material.uniforms.u_time) {
+      material.uniforms.u_time.value = timer.getElapsed()
+    }
+
+    renderer.render(scene, camera)
+    animationFrameId = requestAnimationFrame(animate)
+  }
+  animate()
 })
-const geometry = new THREE.PlaneGeometry(2, 2)
-const mesh = new THREE.Mesh(geometry, material)
-scene.add(mesh)
-
-const timer = new THREE.Timer()
-
-const animate = () => {
-  if (!renderer) return
-  timer.update()
-  material.uniforms.u_time.value = timer.getElapsed()
-  renderer.render(scene, camera)
-  animationFrameId = requestAnimationFrame(animate)
-}
-animate()   
-})               
 
 onUnmounted(() => {
   if (animationFrameId !== null) {
-  cancelAnimationFrame(animationFrameId)
-}
-if (renderer) {
-  renderer.dispose()
-  renderer = null
-}
-
+    cancelAnimationFrame(animationFrameId)
+  }
+  if (renderer) {
+    renderer.dispose()
+    renderer = null
+  }
 })
 </script>
 
 <template>
   <div class="relative h-full w-full">
     <canvas ref="canvasRef" class="absolute inset-0 h-full w-full" />
-    <div
-  v-if="showGradient"
-  class="absolute inset-0 bg-gradient-to-t from-black to-transparent"
-/>
-
+    <div v-if="showGradient" class="absolute inset-0 bg-gradient-to-t from-black to-transparent" />
   </div>
 </template>

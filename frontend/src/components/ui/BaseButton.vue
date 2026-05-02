@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-type Variant = 'primary' | 'ghost' | 'glass'
+type Variant = 'primary' | 'ghost' | 'glass' | 'danger'
 type Size = 'sm' | 'md' | 'lg'
 
 interface Props {
@@ -22,10 +22,13 @@ const props = withDefaults(defineProps<Props>(), {
   type: 'button',
 })
 const variantClasses: Record<Variant, string> = {
-  primary: 'bg-white text-black hover:bg-white/90',
-  ghost: 'bg-transparent text-white border border-white/10 hover:border-white/30 hover:bg-white/5',
-  glass: 'bg-white/5 text-white border border-white/10 backdrop-blur-sm hover:bg-white/10',
+  primary: 'bg-white text-black hover:bg-white/90 focus:ring-black/30',
+  ghost: 'bg-transparent text-white border border-white/10 hover:border-white/30 hover:bg-white/5 focus:ring-white/30',
+  glass: 'bg-white/5 text-white border border-white/10 backdrop-blur-sm hover:bg-white/10 focus:ring-white/30',
+  danger: 'bg-red-500/90 text-white hover:bg-red-500 focus:ring-red-500/40',
+
 }
+
 
 const sizeClasses: Record<Size, string> = {
   sm: 'text-xs px-3 py-1.5',
@@ -36,7 +39,7 @@ const sizeClasses: Record<Size, string> = {
 const buttonClasses = computed(() => [
   // Base (siempre aplicado)
   'inline-flex items-center justify-center font-medium transition-colors rounded-full',
-  'focus:outline-none focus:ring-2 focus:ring-white/30',
+  'focus:outline-none focus:ring-2',
   'disabled:opacity-50 disabled:cursor-not-allowed',
   // Dinámico
   variantClasses[props.variant],
