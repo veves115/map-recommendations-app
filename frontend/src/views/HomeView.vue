@@ -19,7 +19,7 @@
     </div>
     <UserMenu />
   </div>
-  
+
   <!-- Card flotante de detalles -->
   <div
     v-if="placeDetails"
@@ -40,13 +40,15 @@
               </span>
             </p>
           </div>
-          <button
-            type="button"
-            class="text-white/60 hover:text-white text-xl leading-none flex-shrink-0"
+          <BaseIconButton
+            variant="ghost"
+            size="sm"
+            aria-label="Cerrar"
+            class="flex-shrink-0"
             @click="placeDetails = null"
           >
             ✕
-          </button>
+          </BaseIconButton>
         </div>
       </template>
 
@@ -104,7 +106,7 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import { getPlaceDetails } from '@/api/maps'
 import type { NearbyPlace, PlaceDetails } from '@/types/api'
 import UserMenu from '@/components/layout/UserMenu.vue'
-
+import BaseIconButton from '@/components/ui/BaseIconButton.vue'
 
 const placeDetails = ref<PlaceDetails | null>(null)
 
