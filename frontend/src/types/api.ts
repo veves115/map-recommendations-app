@@ -88,4 +88,38 @@ export interface GeocodeResult {
   location: LatLng
   place_id: string
 }
+// ===== Friendships =====
+
+export interface Invite {
+  id: number
+  token: string
+  code: string
+  expires_at: string
+  used_at: string | null
+  created_at: string
+}
+
+export interface InvitePreview {
+  code: string
+  inviter: User
+  expires_at: string
+  is_valid: boolean
+}
+
+export interface Friend {
+  user: User
+  friendship_id: number
+  friends_since: string
+}
+
+export interface Friendship {
+  id: number
+  requester: User
+  addressee: User
+  status: 'pending' | 'accepted'
+  created_at: string
+  responded_at: string | null
+}
+
+
 
