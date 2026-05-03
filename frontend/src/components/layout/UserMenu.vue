@@ -20,9 +20,7 @@ const userInitial = () => {
 <template>
   <Menu as="div" class="absolute top-4 right-4 z-20">
     <MenuButton
-      class="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20
-             text-white font-semibold flex items-center justify-center
-             hover:bg-white/15 transition-colors shadow-card"
+      class="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold flex items-center justify-center hover:bg-white/15 transition-colors shadow-card"
     >
       {{ userInitial() }}
     </MenuButton>
@@ -36,28 +34,29 @@ const userInitial = () => {
       leave-to-class="opacity-0 scale-95"
     >
       <MenuItems
-        class="absolute right-0 mt-2 w-48 origin-top-right
-               bg-surface-raised backdrop-blur-md border border-white/10
-               rounded-card shadow-card overflow-hidden focus:outline-none"
+        class="absolute right-0 mt-2 w-48 origin-top-right bg-surface-raised backdrop-blur-md border border-white/10 rounded-card shadow-card overflow-hidden focus:outline-none"
       >
         <MenuItem v-slot="{ active }">
           <RouterLink
             to="/profile"
-            :class="[
-              'block px-4 py-3 text-sm text-white',
-              active ? 'bg-white/10' : '',
-            ]"
+            :class="['block px-4 py-3 text-sm text-white', active ? 'bg-white/10' : '']"
           >
             Mi perfil
           </RouterLink>
         </MenuItem>
         <MenuItem v-slot="{ active }">
           <RouterLink
+            to="/friends"
+            :class="['block px-4 py-3 text-sm text-white', active ? 'bg-white/10' : '']"
+          >
+            Amigos
+          </RouterLink>
+        </MenuItem>
+
+        <MenuItem v-slot="{ active }">
+          <RouterLink
             to="/chat"
-            :class="[
-              'block px-4 py-3 text-sm text-white',
-              active ? 'bg-white/10' : '',
-            ]"
+            :class="['block px-4 py-3 text-sm text-white', active ? 'bg-white/10' : '']"
           >
             Chat
           </RouterLink>

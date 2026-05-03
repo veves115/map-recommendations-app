@@ -6,12 +6,12 @@ const routes = [
     name: 'Login',
     component: () => import('../views/LoginView.vue'),
   },
-  { 
+  {
     path: '/register',
     name: 'Register',
     component: () => import('../views/RegisterView.vue'),
   },
-  { 
+  {
     meta: { requiresAuth: true },
     path: '/',
     name: 'Home',
@@ -29,6 +29,12 @@ const routes = [
     name: 'Chat',
     component: () => import('../views/ChatView.vue'),
   },
+  {
+    path: '/friends',
+    name: 'friends',
+    component: () => import('@/views/FriendsView.vue'),
+    meta: { requiresAuth: true },
+  },
 ]
 
 const router = createRouter({
@@ -37,7 +43,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const token = localStorage.getItem('token')
 
   if (requiresAuth && !token) {
