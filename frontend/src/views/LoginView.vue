@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { login } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
 import { getMe } from '@/api/auth'
@@ -51,6 +51,7 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 const email = ref('')
 const password = ref('')
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
 const error = ref('')
@@ -66,7 +67,11 @@ const handleLogin = async () => {
     const meResponse = await getMe()
     authStore.login(token, meResponse.data)
 
-    router.push('/')
+    const redirect =
+      typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/')
+        ? route.query.redirect
+        : '/'
+    router.push(redirect)
   } catch (e: any) {
     console.error('Error al iniciar sesión:', e)
     error.value = e?.response?.data?.detail || 'Credenciales incorrectas. Inténtalo de nuevo.'

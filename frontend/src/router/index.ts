@@ -35,6 +35,12 @@ const routes = [
     component: () => import('@/views/FriendsView.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/invite/:token',
+    name: 'invite',
+    component: () => import('@/views/InviteView.vue'),
+    meta: { requiresAuth: true },
+  },
 ]
 
 const router = createRouter({
@@ -47,7 +53,7 @@ router.beforeEach((to) => {
   const token = localStorage.getItem('token')
 
   if (requiresAuth && !token) {
-    return '/login'
+    return { path: '/login', query: { redirect: to.fullPath } }
   }
 })
 
