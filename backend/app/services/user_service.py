@@ -46,8 +46,8 @@ class UserService:
             existing = UserService.get_user_by_email(db, data.email)
             if existing and existing.id != user.id:
                 raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="El email ya está en uso",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="El email ya está en uso",
                 )
             user.email = data.email
 
@@ -55,10 +55,16 @@ class UserService:
             existing = UserService.get_user_by_username(db, data.username)
             if existing and existing.id != user.id:
                 raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="El username ya está en uso",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="El username ya está en uso",
                 )
             user.username = data.username
+
+        if (
+            data.share_location is not None
+            and data.share_location != user.share_location
+        ):
+            user.share_location = data.share_location
 
         db.commit()
         db.refresh(user)

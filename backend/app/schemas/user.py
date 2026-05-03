@@ -15,6 +15,7 @@ class UserCreate(UserBase):
 class UserResponse(UserBase):
     id: int
     is_active: bool
+    share_location: bool
     created_at: datetime
 
     class Config:
@@ -43,6 +44,7 @@ class UserUpdate(BaseModel):
         max_length=30,
         pattern=r"^[a-zA-Z0-9_-]+$",
     )
+    share_location: Optional[bool] = None
 
 
 class PasswordChange(BaseModel):
