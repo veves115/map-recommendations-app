@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import auth, users, maps
 from app.api import preferences, locations, recommendations, messages
+from app.api import auth, users, maps
+from app.api import preferences, locations, recommendations, messages, friendships
 from app.websocket.chat import router as ws_router
 from sqlalchemy import text
 from app.core import database
@@ -30,6 +32,8 @@ app.include_router(locations.router, prefix="/api/v1")
 app.include_router(recommendations.router, prefix="/api/v1")
 app.include_router(messages.router, prefix="/api/v1")
 app.include_router(ws_router)
+app.include_router(friendships.router, prefix="/api/v1")
+
 
 
 @app.get("/")
