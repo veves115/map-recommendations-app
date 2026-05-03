@@ -18,3 +18,22 @@ class User(Base):
     locations = relationship("Location", back_populates="user", cascade="all, delete-orphan")
     sent_messages = relationship("Message", foreign_keys="Message.sender_id", back_populates="sender")
     received_messages = relationship("Message", foreign_keys="Message.receiver_id", back_populates="receiver")
+    
+    sent_friendships = relationship(
+    "Friendship",
+    foreign_keys="Friendship.requester_id",
+    back_populates="requester",
+    cascade="all, delete-orphan",
+)
+received_friendships = relationship(
+    "Friendship",
+    foreign_keys="Friendship.addressee_id",
+    back_populates="addressee",
+    cascade="all, delete-orphan",
+)
+sent_invites = relationship(
+    "FriendInvite",
+    foreign_keys="FriendInvite.inviter_id",
+    back_populates="inviter",
+    cascade="all, delete-orphan",
+)
