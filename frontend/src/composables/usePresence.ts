@@ -141,10 +141,25 @@ export function usePresence() {
   onUnmounted(() => {
     disconnect()
   })
+  function reconnect() {
+  if (ws) {
+    ws.close()
+    // El onclose programa una reconexión automática en 5s.
+    // Para acelerar, cancelamos ese timer y conectamos ahora.
+  }
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer)
+    reconnectTimer = null
+  }
+  // Pequeño delay para que el close se procese
+  setTimeout(connect, 100)
+}
+
 
   return {
     friends,
     status,
     isConnected,
+    reconnect,
   }
 }

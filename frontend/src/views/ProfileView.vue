@@ -59,6 +59,44 @@
       </BaseCard>
       <BaseCard variant="glass">
         <template #header>
+          <h2 class="text-lg font-semibold">Privacidad</h2>
+        </template>
+
+        <div class="flex justify-between items-start gap-4">
+          <div class="flex-1">
+            <p class="text-sm font-medium">Compartir mi ubicación con amigos</p>
+            <p class="text-xs text-white/60 mt-1">
+              Tus amigos verán tu ubicación en tiempo real cuando estés en la app.
+            </p>
+          </div>
+          <Switch
+            :model-value="authStore.user?.share_location ?? false"
+            :disabled="togglingShareLocation"
+            :class="[
+              'relative inline-flex h-6 w-11 items-center rounded-full transition-colors flex-shrink-0 border',
+              authStore.user?.share_location
+                ? 'bg-emerald-500/90 border-emerald-400/60'
+                : 'bg-white/10 border-white/20',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+            ]"
+            @update:model-value="handleToggleShareLocation"
+          >
+            <span
+              :class="[
+                'inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform',
+                authStore.user?.share_location ? 'translate-x-6' : 'translate-x-1',
+              ]"
+            />
+          </Switch>
+        </div>
+
+        <p v-if="shareLocationError" class="text-sm text-red-400 mt-3">
+          {{ shareLocationError }}
+        </p>
+      </BaseCard>
+
+      <BaseCard variant="glass">
+        <template #header>
           <div class="flex justify-between items-center">
             <h2 class="text-lg font-semibold">Seguridad</h2>
             <button
@@ -265,13 +303,11 @@ import { changePassword } from '@/api/auth'
 import { useRouter } from 'vue-router'
 import { deleteMe } from '@/api/users'
 import BaseIconButton from '@/components/ui/BaseIconButton.vue'
-
+import { Switch } from '@headlessui/vue'
 
 const router = useRouter()
-
 const deleteOpen = ref(false)
 const deletingAccount = ref(false)
-
 const isChangingPassword = ref(false)
 const passwordForm = ref({
   current: '',
@@ -281,7 +317,6 @@ const passwordForm = ref({
 const changingPassword = ref(false)
 const passwordError = ref('')
 const passwordSuccess = ref(false)
-
 const isEditing = ref(false)
 const editForm = ref({ username: '', email: '' })
 const saving = ref(false)
@@ -293,6 +328,8 @@ const loading = ref(true)
 const confirmOpen = ref(false)
 const prefIdToDelete = ref<number | null>(null)
 const deleting = ref(false)
+const togglingShareLocation = ref(false)
+const shareLocationError = ref('')
 
 onMounted(async () => {
   try {
@@ -476,6 +513,20 @@ async function handleDeleteAccount() {
   } catch (err) {
     console.error('Error eliminando cuenta:', err)
     deletingAccount.value = false
+  }
+}
+async function handleToggleShareLocation(value: boolean) {
+  togglingShareLocation.value = true
+  shareLocationError.value = ''
+  try {
+    const response = await updateMe({ share_location: value })
+    authStore.updateUser(response.data)
+    // Recargar para que el WS se reconecte con el nuevo valor de share_location
+    window.location.reload()
+  } catch (e: any) {
+    shareLocationError.value = formatApiError(e, 'No se pudo cambiar el ajuste')
+  } finally {
+    togglingShareLocation.value = false
   }
 }
 </script>

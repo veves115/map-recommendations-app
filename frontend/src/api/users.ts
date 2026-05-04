@@ -12,6 +12,7 @@ export const getUserById = (id: number) => {
 export interface UserUpdate {
   username?: string
   email?: string
+  share_location?: boolean
 }
 
 export const updateMe = (data: UserUpdate) => {
