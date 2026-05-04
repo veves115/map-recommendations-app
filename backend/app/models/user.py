@@ -12,6 +12,7 @@ class User(Base):
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
+    share_location = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.now)
 
     # Relaciones

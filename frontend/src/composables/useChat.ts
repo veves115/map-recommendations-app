@@ -48,7 +48,7 @@ export function useChat(otherUserId: Ref<number | null>) {
     }
 
     ws.onerror = () => {
-      error.value = 'Error de conexión WebSocket'
+      error.value = 'Error de conexión'
     }
 
     ws.onclose = () => {
