@@ -3,6 +3,7 @@ export interface User {
     email: string
     username: string
     is_active: boolean
+    share_location: boolean
     created_at: string
 }
 

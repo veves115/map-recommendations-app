@@ -5,6 +5,8 @@ import { useGeolocation } from '@vueuse/core'
 import { getRecommendations } from '@/api/recommendations'
 import type { NearbyPlace } from '@/types/api'
 import { getNearbyPlaces } from '@/api/maps'
+import { usePresence } from '@/composables/usePresence'
+
 
 
 interface Props {
@@ -30,6 +32,9 @@ let PinElementClass: any = null
 let userMarker: any = null
 let markers: any[] = []
 let AdvancedMarker: any = null
+const { friends } = usePresence()
+let friendMarkers: Map<number, any> = new Map()
+
 
 const { coords, error: geoError } = useGeolocation()
 
@@ -70,6 +75,45 @@ watch(() => props.placeType, () => {
   if (!center) return
   loadPlaces(center.lat(), center.lng())
 })
+
+watch(
+  friends,
+  (currentFriends) => {
+    if (!map || !AdvancedMarker || !PinElementClass) return
+
+    // Añadir o actualizar markers de amigos presentes
+    currentFriends.forEach((f, userId) => {
+      const existing = friendMarkers.get(userId)
+      if (existing) {
+        existing.position = { lat: f.lat, lng: f.lng }
+      } else {
+        const friendPin = new PinElementClass({
+          background: '#10b981',     // verde para amigos
+          borderColor: '#ffffff',
+          glyphColor: '#ffffff',
+          scale: 1.0,
+        })
+        const marker = new AdvancedMarker({
+          position: { lat: f.lat, lng: f.lng },
+          map,
+          content: friendPin.element,
+          title: f.username,
+        })
+        friendMarkers.set(userId, marker)
+      }
+    })
+
+    // Quitar markers de amigos que ya no están
+    friendMarkers.forEach((marker, userId) => {
+      if (!currentFriends.has(userId)) {
+        marker.map = null
+        friendMarkers.delete(userId)
+      }
+    })
+  },
+  { deep: true },
+)
+
 
 
 
