@@ -79,7 +79,7 @@ def mark_message_as_read(
     if message.receiver_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="No tienes permiso para marcar este mensaje como leido"
+            detail="No tienes permiso para marcar este mensaje como leído"
         )
 
     return MessageService.mark_as_read(db, message)
