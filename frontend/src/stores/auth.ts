@@ -34,7 +34,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await getMe()
         this.user = response.data
-      } catch (err) {
+      } catch{
         // Token expirado o inválido → cerrar sesión
         this.logout()
       }

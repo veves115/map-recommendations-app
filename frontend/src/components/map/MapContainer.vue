@@ -33,7 +33,7 @@ let userMarker: any = null
 let markers: any[] = []
 let AdvancedMarker: any = null
 const { friends } = usePresence()
-let friendMarkers: Map<number, any> = new Map()
+const friendMarkers: Map<number, any> = new Map()
 
 
 const { coords, error: geoError } = useGeolocation()
