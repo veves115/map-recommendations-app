@@ -12,3 +12,4 @@ python-dotenv
 websockets
 email-validator
 alembic
+slowapi==0.1.9

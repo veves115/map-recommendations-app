@@ -6,15 +6,15 @@ from app.services.user_service import UserService
 from app.services.auth_service import AuthService
 from app.core.deps import get_current_active_user
 from app.models.user import User
-
+from fastapi import Request
+from app.core.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post(
-    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
-)
-def register(user: UserCreate, db: Session = Depends(get_db)):
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("3/hour")
+def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):
     """Registrar un nuevo usuario"""
     # Verificar si el email ya está registrado
     db_user = UserService.get_user_by_email(db, user.email)
@@ -37,7 +37,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=Token)
-def login(credentials: UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, credentials: UserLogin, db: Session = Depends(get_db)):
     """Iniciar sesión y obtener token de acceso"""
     # Autenticar usuario
     user = AuthService.authenticate_user(db, credentials)
@@ -54,7 +55,9 @@ def get_current_user_info(current_user=Depends(get_current_active_user)):
 
 
 @router.post("/change-password", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("5/hour")
 def change_password(
+    request: Request,
     data: PasswordChange,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),

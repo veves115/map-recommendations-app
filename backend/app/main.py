@@ -1,14 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import auth, users, maps
-from app.api import preferences, locations, recommendations, messages
-from app.api import auth, users, maps
 from app.api import preferences, locations, recommendations, messages, friendships
 from app.websocket.chat import router as ws_router
-from app.websocket.chat import router as ws_router
-from app.websocket.presence import router as presence_router  # NUEVO
+from app.websocket.presence import router as presence_router
 from sqlalchemy import text
 from app.core import database
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+limiter = Limiter(key_func=get_remote_address)
 
 
 app = FastAPI(
@@ -16,6 +18,10 @@ app = FastAPI(
     description="API para recomendaciones basadas en ubicacion",
     version="1.0.0"
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 
 # Configurar CORS (para que el frontend pueda conectarse)
 app.add_middleware(
