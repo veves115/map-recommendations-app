@@ -22,10 +22,7 @@
 
         <p v-if="loadingUsers" class="text-sm text-white/60">Cargando...</p>
 
-        <p
-          v-else-if="otherUsers.length === 0"
-          class="text-sm text-white/60"
-        >
+        <p v-else-if="otherUsers.length === 0" class="text-sm text-white/60">
           No hay otros usuarios todavía.
         </p>
 
@@ -33,13 +30,12 @@
           <li v-for="user in otherUsers" :key="user.id">
             <button
               type="button"
-              class="w-full text-left py-3 px-2 -mx-2 rounded-lg
-                     hover:bg-white/5 transition-colors
-                     flex items-center gap-3"
+              class="w-full text-left py-3 px-2 -mx-2 rounded-lg hover:bg-white/5 transition-colors flex items-center gap-3"
               @click="selectedUser = user"
             >
-              <div class="w-9 h-9 rounded-full bg-white/10 border border-white/15
-                          flex items-center justify-center font-semibold">
+              <div
+                class="w-9 h-9 rounded-full bg-white/10 border border-white/15 flex items-center justify-center font-semibold"
+              >
                 {{ user.username.charAt(0).toUpperCase() }}
               </div>
               <div>
@@ -63,14 +59,8 @@
 
         <BaseCard variant="glass" padding="none" class="flex-1 flex flex-col min-h-0">
           <!-- Messages -->
-          <div
-            ref="messagesEl"
-            class="flex-1 overflow-y-auto p-5 space-y-2 min-h-0"
-          >
-            <p
-              v-if="messages.length === 0"
-              class="text-sm text-white/50 text-center mt-8"
-            >
+          <div ref="messagesEl" class="flex-1 overflow-y-auto p-5 space-y-2 min-h-0">
+            <p v-if="messages.length === 0" class="text-sm text-white/50 text-center mt-8">
               Aún no hay mensajes. Escribe el primero.
             </p>
             <div
@@ -92,23 +82,14 @@
           </div>
 
           <!-- Input -->
-          <form
-            @submit.prevent="handleSend"
-            class="p-3 border-t border-white/10 flex gap-2"
-          >
+          <form @submit.prevent="handleSend" class="p-3 border-t border-white/10 flex gap-2">
             <input
               v-model="draft"
               type="text"
               placeholder="Escribe un mensaje..."
-              class="flex-1 bg-white/5 border border-white/10 rounded-full
-                     px-4 py-2 text-white placeholder:text-white/40
-                     focus:outline-none focus:border-white/30"
+              class="flex-1 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-white placeholder:text-white/40 focus:outline-none focus:border-white/30"
             />
-            <BaseButton
-              type="submit"
-              variant="primary"
-              :disabled="!draft.trim() || !connected"
-            >
+            <BaseButton type="submit" variant="primary" :disabled="!draft.trim() || !connected">
               Enviar
             </BaseButton>
           </form>
@@ -123,7 +104,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { listUsers } from '@/api/users'
+import { listFriends } from '@/api/friendships'
 import { useChat } from '@/composables/useChat'
 import type { User, Message } from '@/types/api'
 import BaseCard from '@/components/ui/BaseCard.vue'
@@ -137,9 +118,7 @@ const selectedUser = ref<User | null>(null)
 const draft = ref('')
 const messagesEl = ref<HTMLDivElement | null>(null)
 
-const otherUsers = computed(() =>
-  users.value.filter(u => u.id !== authStore.user?.id),
-)
+const otherUsers = computed(() => users.value.filter((u) => u.id !== authStore.user?.id))
 
 const otherUserId = computed(() => selectedUser.value?.id ?? null)
 const { messages, connected, error, send } = useChat(otherUserId)
@@ -156,17 +135,21 @@ function handleSend() {
 }
 
 // Auto-scroll al fondo cuando llegan mensajes
-watch(messages, async () => {
-  await nextTick()
-  if (messagesEl.value) {
-    messagesEl.value.scrollTop = messagesEl.value.scrollHeight
-  }
-}, { deep: true })
+watch(
+  messages,
+  async () => {
+    await nextTick()
+    if (messagesEl.value) {
+      messagesEl.value.scrollTop = messagesEl.value.scrollHeight
+    }
+  },
+  { deep: true },
+)
 
 onMounted(async () => {
   try {
-    const response = await listUsers()
-    users.value = response.data
+    const response = await listFriends()
+    users.value = response.data.map((f) => f.user)
   } catch (err) {
     console.error('Error cargando usuarios:', err)
   } finally {

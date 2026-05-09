@@ -7,8 +7,6 @@ import type { NearbyPlace } from '@/types/api'
 import { getNearbyPlaces } from '@/api/maps'
 import { usePresence } from '@/composables/usePresence'
 
-
-
 interface Props {
   center?: { lat: number; lng: number }
   zoom?: number
@@ -21,9 +19,11 @@ const props = withDefaults(defineProps<Props>(), {
   placeType: null,
 })
 
+import type { FriendLocation } from '@/composables/usePresence'
 
 const emit = defineEmits<{
   'place-click': [place: NearbyPlace]
+  'friend-click': [friend: FriendLocation]
 }>()
 
 const mapRef = ref<HTMLDivElement | null>(null)
@@ -34,7 +34,6 @@ let markers: any[] = []
 let AdvancedMarker: any = null
 const { friends } = usePresence()
 const friendMarkers: Map<number, any> = new Map()
-
 
 const { coords, error: geoError } = useGeolocation()
 
@@ -69,12 +68,15 @@ watch(
   },
 )
 
-watch(() => props.placeType, () => {
-  if (!map) return
-  const center = map.getCenter()
-  if (!center) return
-  loadPlaces(center.lat(), center.lng())
-})
+watch(
+  () => props.placeType,
+  () => {
+    if (!map) return
+    const center = map.getCenter()
+    if (!center) return
+    loadPlaces(center.lat(), center.lng())
+  },
+)
 
 watch(
   friends,
@@ -88,7 +90,7 @@ watch(
         existing.position = { lat: f.lat, lng: f.lng }
       } else {
         const friendPin = new PinElementClass({
-          background: '#10b981',     // verde para amigos
+          background: '#10b981',
           borderColor: '#ffffff',
           glyphColor: '#ffffff',
           scale: 1.0,
@@ -98,7 +100,16 @@ watch(
           map,
           content: friendPin.element,
           title: f.username,
+          gmpClickable: true,
         })
+        marker.addListener('gmp-click', () => {
+          console.log('CLICK EN PIN AMIGO', userId)
+          const current = friends.value.get(userId)
+          console.log('CURRENT:', current)
+          if (current) emit('friend-click', current)
+          else console.log('NO HAY CURRENT — ¿userId mal?')
+        })
+
         friendMarkers.set(userId, marker)
       }
     })
@@ -113,9 +124,6 @@ watch(
   },
   { deep: true },
 )
-
-
-
 
 onMounted(async () => {
   if (!mapRef.value) return
@@ -159,14 +167,17 @@ async function loadPlaces(lat: number, lng: number) {
           limit: 20,
         })
 
-    markers.forEach(m => { m.map = null })
+    markers.forEach((m) => {
+      m.map = null
+    })
     markers = []
 
-    response.data.forEach(place => {
+    response.data.forEach((place) => {
       const marker = new AdvancedMarker({
         position: place.location,
         map,
         title: place.name,
+        gmpClickable: true,
       })
       marker.addListener('gmp-click', () => emit('place-click', place))
       markers.push(marker)
@@ -192,10 +203,7 @@ function handleRecenter() {
 
     <button
       type="button"
-      class="absolute bottom-6 right-6 w-12 h-12 rounded-full
-             bg-black/80 backdrop-blur-md border border-white/20
-             text-white flex items-center justify-center
-             shadow-card hover:bg-black/90 transition-colors z-10"
+      class="absolute bottom-6 right-6 w-12 h-12 rounded-full bg-black/80 backdrop-blur-md border border-white/20 text-white flex items-center justify-center shadow-card hover:bg-black/90 transition-colors z-10"
       title="Centrar en mi ubicación"
       @click="handleRecenter"
     >
@@ -203,4 +211,3 @@ function handleRecenter() {
     </button>
   </div>
 </template>
-
