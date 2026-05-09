@@ -6,6 +6,7 @@ from app.services.user_service import UserService
 from app.services.message_service import MessageService
 from app.schemas.message import MessageCreate
 from app.websocket.manager import manager
+from app.websocket.user_manager import user_manager
 import logging
 
 logger = logging.getLogger(__name__)
@@ -87,7 +88,11 @@ async def websocket_chat(
                     raise ValueError("empty content")
             except (KeyError, ValueError, TypeError):
                 await websocket.send_text(
-                    json.dumps({"error": "Formato inválido. Usa {\"receiver_id\": int, \"content\": str}"})
+                    json.dumps(
+                        {
+                            "error": 'Formato inválido. Usa {"receiver_id": int, "content": str}'
+                        }
+                    )
                 )
                 continue
 
@@ -96,12 +101,14 @@ async def websocket_chat(
                     json.dumps({"error": "No puedes enviarte un mensaje a ti mismo"})
                 )
                 continue
-            
-            receiver  = UserService.get_user_by_id(db,receiver_id)
+
+            receiver = UserService.get_user_by_id(db, receiver_id)
             if not receiver:
-                await websocket.send_text(json.dumps({"error": "Usuario receptor no existe"}))
+                await websocket.send_text(
+                    json.dumps({"error": "Usuario receptor no existe"})
+                )
                 continue
-            
+
             # Persist
             msg = MessageService.create_message(
                 db,
@@ -110,17 +117,57 @@ async def websocket_chat(
             )
 
             # Broadcast to room
-            payload = json.dumps({
-                "id": msg.id,
-                "sender_id": msg.sender_id,
-                "receiver_id": msg.receiver_id,
-                "content": msg.content,
-                "timestamp": msg.timestamp.isoformat(),
-                "is_read": msg.is_read,
-            })
+            payload = json.dumps(
+                {
+                    "id": msg.id,
+                    "sender_id": msg.sender_id,
+                    "receiver_id": msg.receiver_id,
+                    "content": msg.content,
+                    "timestamp": msg.timestamp.isoformat(),
+                    "is_read": msg.is_read,
+                }
+            )
             await manager.broadcast(room_id, payload)
 
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id)
     finally:
         db.close()
+
+
+@router.websocket("/user/{user_id}")
+async def websocket_user(
+    websocket: WebSocket,
+    user_id: int,
+    token: str = Query(...),
+):
+    current_user = _authenticate(token)
+    if current_user is None or not current_user.is_active:
+        await websocket.close(code=1008)
+        return
+
+    if current_user.id != user_id:
+        await websocket.close(code=1008)
+        return
+
+    await user_manager.connect(websocket, user_id)
+    try:
+        while True:
+            raw = await websocket.receive_text()
+            try:
+                data = json.loads(raw)
+                if data.get("type") == "emoji":
+                    receiver_id = int(data["receiver_id"])
+                    emoji = str(data["emoji"])
+                    payload = json.dumps(
+                        {
+                            "type": "emoji",
+                            "sender_id": current_user.id,
+                            "emoji": emoji,
+                        }
+                    )
+                    await user_manager.send_to_user(receiver_id, payload)
+            except (KeyError, ValueError, TypeError):
+                pass
+    except WebSocketDisconnect:
+        user_manager.disconnect(websocket, user_id)

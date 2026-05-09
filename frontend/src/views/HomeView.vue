@@ -1,6 +1,10 @@
 <template>
   <div class="w-screen h-screen relative">
-    <MapContainer :place-type="activeFilter" @place-click="handlePlaceClick" />
+    <MapContainer
+      :place-type="activeFilter"
+      @place-click="handlePlaceClick"
+      @friend-click="handleFriendClick"
+    />
     <div class="absolute top-4 left-4 right-20 z-10 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
       <button
         v-for="filter in PLACE_FILTERS"
@@ -18,6 +22,22 @@
       </button>
     </div>
     <UserMenu />
+    <!-- Animación emoji saliente -->
+    <div
+      v-if="flyingEmoji"
+      class="pointer-events-none fixed z-50 text-5xl animate-fly-out"
+      :style="flyingEmoji.style"
+    >
+      {{ flyingEmoji.emoji }}
+    </div>
+    <!-- Animación emoji entrante -->
+    <div
+      v-if="incomingEmoji"
+      class="pointer-events-none fixed z-50 text-5xl animate-fly-in"
+      :style="incomingEmoji.style"
+    >
+      {{ incomingEmoji.emoji }}
+    </div>
   </div>
 
   <!-- Card flotante de detalles -->
@@ -97,6 +117,46 @@
       </div>
     </BaseCard>
   </div>
+  <!-- Card flotante de amigo -->
+  <div
+    v-if="selectedFriend"
+    class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-10"
+  >
+    <BaseCard variant="solid">
+      <template #header>
+        <div class="flex justify-between items-start gap-4">
+          <div>
+            <h2 class="text-xl font-bold">{{ selectedFriend.username }}</h2>
+            <p class="text-sm text-white/60 mt-0.5">
+              {{ relativeTime(selectedFriend.updated_at) }}
+            </p>
+          </div>
+          <BaseIconButton
+            variant="ghost"
+            size="sm"
+            aria-label="Cerrar"
+            class="flex-shrink-0"
+            @click="selectedFriend = null"
+          >
+            ✕
+          </BaseIconButton>
+        </div>
+      </template>
+
+      <p class="text-sm text-white/60">Tu amigo está compartiendo su ubicación en tiempo real.</p>
+      <div class="flex gap-3 mt-3">
+        <button
+          v-for="emoji in ['🔥', '❤️', '👋', '😂', '👍']"
+          :key="emoji"
+          type="button"
+          class="text-2xl hover:scale-125 transition-transform"
+          @click="sendEmojiToFriend(emoji)"
+        >
+          {{ emoji }}
+        </button>
+      </div>
+    </BaseCard>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -107,8 +167,56 @@ import { getPlaceDetails } from '@/api/maps'
 import type { NearbyPlace, PlaceDetails } from '@/types/api'
 import UserMenu from '@/components/layout/UserMenu.vue'
 import BaseIconButton from '@/components/ui/BaseIconButton.vue'
+import type { FriendLocation } from '@/composables/usePresence'
+import { relativeTime } from '@/utils/time'
+import { useUserSocket } from '@/composables/useUserSocket'
 
 const placeDetails = ref<PlaceDetails | null>(null)
+const selectedFriend = ref<FriendLocation | null>(null)
+const { sendEmoji, onEmoji } = useUserSocket()
+const flyingEmoji = ref<{ emoji: string; style: string } | null>(null)
+
+function triggerFlyOut(emoji: string) {
+  const cx = window.innerWidth / 2
+  const cy = window.innerHeight / 2
+  flyingEmoji.value = {
+    emoji,
+    style: `left: ${cx}px; top: ${cy}px; --tx: ${cx}px; --ty: ${-cy}px;`,
+  }
+  setTimeout(() => {
+    flyingEmoji.value = null
+  }, 800)
+}
+
+const incomingEmoji = ref<{ emoji: string; style: string } | null>(null)
+
+function triggerFlyIn(emoji: string) {
+  const cx = window.innerWidth / 2
+  const cy = window.innerHeight / 2
+  incomingEmoji.value = {
+    emoji,
+    style: `left: ${cx}px; top: ${cy}px; --tx: ${cx}px; --ty: ${-cy}px;`,
+  }
+  setTimeout(() => {
+    incomingEmoji.value = null
+  }, 800)
+}
+
+onEmoji((_senderId, emoji) => {
+  triggerFlyIn(emoji)
+})
+
+function sendEmojiToFriend(emoji: string) {
+  if (!selectedFriend.value) return
+  sendEmoji(selectedFriend.value.user_id, emoji)
+  triggerFlyOut(emoji)
+}
+
+function handleFriendClick(friend: FriendLocation) {
+  console.log('HOMEVIEW recibe friend-click:', friend)
+  selectedFriend.value = friend
+  placeDetails.value = null
+}
 
 const PLACE_FILTERS = [
   { value: null, label: 'Todo' },
@@ -126,6 +234,7 @@ const handlePlaceClick = async (place: NearbyPlace) => {
   try {
     const response = await getPlaceDetails(place.place_id)
     placeDetails.value = response.data
+    selectedFriend.value = null // cerrar card de amigo si estaba abierta
   } catch (err) {
     console.error('Error cargando detalles:', err)
   }

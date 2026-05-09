@@ -34,3 +34,22 @@
 
 }
 
+@keyframes fly-out {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) scale(0.3); opacity: 0; }
+}
+
+@keyframes fly-in {
+  0%   { transform: translate(var(--tx), var(--ty)) scale(0.3); opacity: 0; }
+  100% { transform: translate(0, 0) scale(1); opacity: 1; }
+}
+
+.animate-fly-out {
+  animation: fly-out 0.8s ease-in forwards;
+}
+
+.animate-fly-in {
+  animation: fly-in 0.8s ease-out forwards;
+}
+
+
