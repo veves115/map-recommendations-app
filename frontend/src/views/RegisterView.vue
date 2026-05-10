@@ -12,9 +12,18 @@
         </div>
 
         <form @submit.prevent="handleRegister" class="space-y-4">
-          <BaseInput v-model="email" type="email" placeholder="info@gmail.com" />
-          <BaseInput v-model="username" type="text" placeholder="Nombre de usuario" />
-          <BaseInput v-model="password" type="password" placeholder="Contraseña" />
+          <BaseInput v-model="email" type="email" placeholder="Tu correo electrónico" />
+          <BaseInput
+            v-model="username"
+            type="text"
+            placeholder="Nombre de usuario (sin espacios)"
+          />
+          <BaseInput
+            v-model="password"
+            type="password"
+            placeholder="Contraseña (mín. 8 caracteres)"
+            :togglePassword="true"
+          />
           <BaseButton variant="primary" type="submit" block> Registrarse </BaseButton>
           <p class="text-center text-sm text-white/60">
             ¿Ya tienes cuenta?

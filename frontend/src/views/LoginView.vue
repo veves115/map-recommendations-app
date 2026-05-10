@@ -16,8 +16,13 @@
 
         <!-- Formulario -->
         <form @submit.prevent="handleLogin" class="space-y-4">
-          <BaseInput v-model="email" type="email" placeholder="info@gmail.com" />
-          <BaseInput v-model="password" type="password" placeholder="Contraseña" />
+          <BaseInput v-model="email" type="email" placeholder="Tu correo electrónico" />
+          <BaseInput
+            v-model="password"
+            type="password"
+            placeholder="Tu contraseña"
+            :togglePassword="true"
+          />
 
           <p v-if="error" class="text-center text-sm text-red-400">
             {{ error }}
@@ -30,6 +35,11 @@
             ¿No tienes cuenta?
             <router-link to="/register" class="text-white hover:underline">
               Regístrate
+            </router-link>
+          </p>
+          <p class="text-center text-sm text-white/60">
+            <router-link to="/forgot-password" class="text-white hover:underline">
+              ¿Olvidaste tu contraseña?
             </router-link>
           </p>
         </form>
@@ -63,7 +73,7 @@ const handleLogin = async () => {
   try {
     const response = await login(email.value, password.value)
     const token = response.data.access_token
-    localStorage.setItem('token', token) // ← AÑADIR esta línea
+    localStorage.setItem('token', token)
     const meResponse = await getMe()
     authStore.login(token, meResponse.data)
 

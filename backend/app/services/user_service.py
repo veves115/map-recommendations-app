@@ -97,3 +97,9 @@ class UserService:
             return
         user.is_active = False
         db.commit()
+        
+    @staticmethod
+    def set_password(db: Session, user: User, new_password: str) -> None:
+        user.hashed_password = get_password_hash(new_password)
+        db.commit()
+

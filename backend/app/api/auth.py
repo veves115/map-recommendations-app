@@ -1,18 +1,31 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.user import UserCreate, UserLogin, UserResponse, Token, PasswordChange
+from app.schemas.user import (
+    UserCreate,
+    UserLogin,
+    UserResponse,
+    Token,
+    PasswordChange,
+    ForgotPassword,
+    ResetPassword,
+)
 from app.services.user_service import UserService
 from app.services.auth_service import AuthService
 from app.core.deps import get_current_active_user
 from app.models.user import User
 from fastapi import Request
 from app.core.limiter import limiter
+from app.services.password_reset_service import PasswordResetService
+from app.services.email_service import EmailService
+
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
+)
 @limiter.limit("20/hour")
 def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):
     """Registrar un nuevo usuario"""
@@ -69,3 +82,25 @@ def change_password(
         current_password=data.current_password,
         new_password=data.new_password,
     )
+
+
+@router.post("/forgot-password", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("3/hour")
+def forgot_password(
+    request: Request, data: ForgotPassword, db: Session = Depends(get_db)
+):
+    user = UserService.get_user_by_email(db, data.email)
+    if user and user.is_active:
+        token = PasswordResetService.create_token(db, user)
+        EmailService.send_password_reset(user.email, user.username, token)
+
+
+@router.post("/reset-password", status_code=status.HTTP_204_NO_CONTENT)
+def reset_password(data: ResetPassword, db: Session = Depends(get_db)):
+    reset = PasswordResetService.get_valid_token(db, data.token)
+    if not reset:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token inválido o expirado",
+        )
+    PasswordResetService.consume_token(db, reset, data.new_password)
