@@ -13,7 +13,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-@limiter.limit("3/hour")
+@limiter.limit("20/hour")
 def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):
     """Registrar un nuevo usuario"""
     # Verificar si el email ya está registrado
