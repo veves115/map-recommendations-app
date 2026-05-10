@@ -37,6 +37,8 @@ const friendMarkers: Map<number, any> = new Map()
 
 const { coords, error: geoError } = useGeolocation()
 
+let hasInitialCenter = false
+
 watch(
   () => ({ lat: coords.value.latitude, lng: coords.value.longitude }),
   (pos) => {
@@ -44,9 +46,12 @@ watch(
     if (geoError.value) return
     if (pos.lat === 0 && pos.lng === 0) return
 
-    map.setCenter(pos)
+    if (!hasInitialCenter) {
+      map.setCenter(pos)
+      hasInitialCenter = true
+      loadPlaces(pos.lat, pos.lng)
+    }
 
-    // Crear o mover el marker del usuario
     if (!userMarker && AdvancedMarker && PinElementClass) {
       const userPin = new PinElementClass({
         background: '#3b82f6',
@@ -63,8 +68,6 @@ watch(
     } else if (userMarker) {
       userMarker.position = pos
     }
-
-    loadPlaces(pos.lat, pos.lng)
   },
 )
 
@@ -77,6 +80,12 @@ watch(
     loadPlaces(center.lat(), center.lng())
   },
 )
+function hasMovedSignificantly(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+): boolean {
+  return Math.abs(a.lat - b.lat) > 0.0001 || Math.abs(a.lng - b.lng) > 0.0001
+}
 
 watch(
   friends,
@@ -87,7 +96,9 @@ watch(
     currentFriends.forEach((f, userId) => {
       const existing = friendMarkers.get(userId)
       if (existing) {
-        existing.position = { lat: f.lat, lng: f.lng }
+        if (hasMovedSignificantly(existing.position, { lat: f.lat, lng: f.lng })) {
+          existing.position = { lat: f.lat, lng: f.lng }
+        }
       } else {
         const friendPin = new PinElementClass({
           background: '#10b981',
@@ -103,11 +114,8 @@ watch(
           gmpClickable: true,
         })
         marker.addListener('gmp-click', () => {
-          console.log('CLICK EN PIN AMIGO', userId)
           const current = friends.value.get(userId)
-          console.log('CURRENT:', current)
           if (current) emit('friend-click', current)
-          else console.log('NO HAY CURRENT — ¿userId mal?')
         })
 
         friendMarkers.set(userId, marker)
