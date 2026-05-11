@@ -11,8 +11,10 @@ class AuthService:
     @staticmethod
     def authenticate_user(db: Session, credentials: UserLogin):
         """Autenticar usuario"""
-        user = UserService.get_user_by_email(db, credentials.email)
-        
+        if "@" in credentials.email:
+            user = UserService.get_user_by_email(db, credentials.email)
+        else:
+            user = UserService.get_user_by_username(db, credentials.email)
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

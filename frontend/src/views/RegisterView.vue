@@ -24,6 +24,12 @@
             placeholder="Contraseña (mín. 8 caracteres)"
             :togglePassword="true"
           />
+          <div class="flex items-center gap-2 text-xs px-1">
+            <span :class="password.length >= 8 ? 'text-green-400' : 'text-white/40'">
+              {{ password.length >= 8 ? '✓' : '○' }} Mínimo 8 caracteres
+            </span>
+          </div>
+
           <BaseButton variant="primary" type="submit" block> Registrarse </BaseButton>
           <p class="text-center text-sm text-white/60">
             ¿Ya tienes cuenta?

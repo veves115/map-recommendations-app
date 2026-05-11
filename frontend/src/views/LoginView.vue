@@ -16,7 +16,7 @@
 
         <!-- Formulario -->
         <form @submit.prevent="handleLogin" class="space-y-4">
-          <BaseInput v-model="email" type="email" placeholder="Tu correo electrónico" />
+          <BaseInput v-model="email" type="text" placeholder="Email o nombre de usuario" />
           <BaseInput
             v-model="password"
             type="password"

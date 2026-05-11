@@ -23,7 +23,7 @@ class UserResponse(UserBase):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 
