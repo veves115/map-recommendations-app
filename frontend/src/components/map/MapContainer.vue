@@ -35,6 +35,21 @@ let AdvancedMarker: any = null
 const { friends } = usePresence()
 const friendMarkers: Map<number, any> = new Map()
 
+type MapType = 'auto' | 'roadmap' | 'hybrid'
+const mapType = ref<MapType>('auto')
+
+function applyMapType(type: MapType, currentZoom?: number) {
+  if (!map) return
+  if (type === 'roadmap') {
+    map.setMapTypeId('roadmap')
+  } else if (type === 'hybrid') {
+    map.setMapTypeId('hybrid')
+  } else {
+    const zoom = currentZoom ?? map.getZoom() ?? 14
+    map.setMapTypeId(zoom < 14 ? 'hybrid' : 'roadmap')
+  }
+}
+
 const { coords, error: geoError } = useGeolocation()
 
 let hasInitialCenter = false
@@ -152,7 +167,18 @@ onMounted(async () => {
     center: props.center,
     zoom: props.zoom,
     disableDefaultUI: true,
-    zoomControl: true,
+    zoomControl: false,
+  })
+
+  map.addListener('zoom_changed', () => {
+    if (mapType.value === 'auto') {
+      applyMapType('auto')
+    }
+  })
+  applyMapType(mapType.value, props.zoom)
+
+  watch(mapType, (type) => {
+    applyMapType(type)
   })
 
   loadPlaces(props.center.lat, props.center.lng)
@@ -217,5 +243,26 @@ function handleRecenter() {
     >
       <span class="text-xl">📍</span>
     </button>
+    <!-- Selector de tipo de mapa -->
+    <div
+      class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-1 bg-black/80 backdrop-blur-md border border-white/20 rounded-full p-1"
+    >
+      <button
+        v-for="option in [
+          { value: 'auto', label: 'Auto' },
+          { value: 'roadmap', label: 'Mapa' },
+          { value: 'hybrid', label: 'Satélite' },
+        ] as const"
+        :key="option.value"
+        type="button"
+        :class="[
+          'px-3 py-1 rounded-full text-xs font-medium transition-colors',
+          mapType === option.value ? 'bg-white text-black' : 'text-white/70 hover:text-white',
+        ]"
+        @click="mapType = option.value"
+      >
+        {{ option.label }}
+      </button>
+    </div>
   </div>
 </template>
