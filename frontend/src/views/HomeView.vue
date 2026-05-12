@@ -89,6 +89,15 @@
       >
         🔗 {{ shortDomain(placeDetails.website) }}
       </a>
+      <a
+        :href="`https://www.google.com/maps/dir/?api=1&destination=${placeDetails.location.lat},${placeDetails.location.lng}`"
+        target="_blank"
+        rel="noopener"
+        class="mt-3 flex items-center gap-2 text-sm font-medium text-white bg-white/10 hover:bg-white/20 transition-colors rounded-lg px-3 py-2"
+      >
+        <Navigation :size="16" />
+        Cómo llegar
+      </a>
 
       <details v-if="placeDetails.opening_hours" class="mt-3 text-sm">
         <summary class="text-white/70 cursor-pointer hover:text-white">Horarios</summary>
@@ -170,6 +179,7 @@ import BaseIconButton from '@/components/ui/BaseIconButton.vue'
 import type { FriendLocation } from '@/composables/usePresence'
 import { relativeTime } from '@/utils/time'
 import { useUserSocket } from '@/composables/useUserSocket'
+import { Navigation } from 'lucide-vue-next'
 
 const placeDetails = ref<PlaceDetails | null>(null)
 const selectedFriend = ref<FriendLocation | null>(null)
