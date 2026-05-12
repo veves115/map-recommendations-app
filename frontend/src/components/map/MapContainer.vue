@@ -9,7 +9,9 @@ import { usePresence } from '@/composables/usePresence'
 import { useWeather } from '@/composables/useWeather'
 import WeatherIcon from '@/components/ui/WeatherIcon.vue'
 import { MapPin, RefreshCw } from 'lucide-vue-next'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const { weather, fetchWeather } = useWeather()
 const refreshing = ref(false)
 
@@ -83,17 +85,14 @@ watch(
       fetchWeather(pos.lat, pos.lng)
     }
 
-    if (!userMarker && AdvancedMarker && PinElementClass) {
-      const userPin = new PinElementClass({
-        background: '#3b82f6',
-        borderColor: '#ffffff',
-        glyphColor: '#ffffff',
-        scale: 1.1,
-      })
+    if (!userMarker && AdvancedMarker) {
+      const el = document.createElement('div')
+el.style.cssText = 'display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#3b82f6;border:2px solid white;color:white;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.3)'
+el.textContent = (authStore.user?.username ?? authStore.user?.email ?? '?').charAt(0).toUpperCase()
       userMarker = new AdvancedMarker({
         position: pos,
         map,
-        content: userPin.element,
+        content: el,
         title: 'Tu ubicación',
       })
     } else if (userMarker) {
@@ -131,19 +130,18 @@ watch(
           existing.position = { lat: f.lat, lng: f.lng }
         }
       } else {
-        const friendPin = new PinElementClass({
-          background: '#10b981',
-          borderColor: '#ffffff',
-          glyphColor: '#ffffff',
-          scale: 1.0,
-        })
+        const el = document.createElement('div')
+el.style.cssText = 'display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#10b981;border:2px solid white;color:white;font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,0.3)'
+el.textContent = (f.username ?? '?').charAt(0).toUpperCase()
+
         const marker = new AdvancedMarker({
           position: { lat: f.lat, lng: f.lng },
           map,
-          content: friendPin.element,
+          content: el,
           title: f.username,
           gmpClickable: true,
         })
+
         marker.addListener('gmp-click', () => {
           const current = friends.value.get(userId)
           if (current) emit('friend-click', current)
@@ -176,7 +174,6 @@ onMounted(async () => {
   const markerLib = (await importLibrary('marker')) as any
   AdvancedMarker = markerLib.AdvancedMarkerElement
   PinElementClass = markerLib.PinElement
-  AdvancedMarker = markerLib.AdvancedMarkerElement
 
   map = new Map(mapRef.value, {
     mapId: 'DEMO_MAP_ID',
@@ -258,7 +255,9 @@ function handleRecenter() {
     >
       <WeatherIcon :condition="weather.condition" :size="32" />
       <div class="flex flex-col leading-tight">
-        <div class="text-2xl font-extralight">{{ weather.temp }}<span class="text-base">°</span></div>
+        <div class="text-2xl font-extralight">
+          {{ weather.temp }}<span class="text-base">°</span>
+        </div>
         <div class="flex items-center gap-1 text-xs text-white/60">
           <MapPin :size="10" />
           <span>{{ weather.city }}</span>
