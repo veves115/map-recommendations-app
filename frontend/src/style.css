@@ -52,4 +52,38 @@
   animation: fly-in 0.8s ease-out forwards;
 }
 
+@keyframes sway {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+}
+@keyframes raindrop {
+  0% { transform: translateY(0); opacity: 0.8; }
+  100% { transform: translateY(12px); opacity: 0; }
+}
+@keyframes lightning {
+  0%, 100% { opacity: 0; }
+  10%, 70% { opacity: 1; }
+  40% { opacity: 0; }
+}
+@keyframes snowflake {
+  0% { transform: translate(0, 0); opacity: 0.8; }
+  100% { transform: translate(3px, 14px); opacity: 0; }
+}
+@keyframes fog {
+  0%, 100% { opacity: 0.2; transform: translateX(0); }
+  50% { opacity: 0.6; transform: translateX(3px); }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-sway { animation: sway 6s ease-in-out infinite; }
+.animate-raindrop { animation: raindrop 0.8s ease-in infinite; }
+.animate-lightning { animation: lightning 3s infinite; }
+.animate-snowflake { animation: snowflake 2s ease-in infinite; }
+.animate-fog { animation: fog 3s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 12s linear infinite; }
+
+
 

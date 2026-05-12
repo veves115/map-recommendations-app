@@ -6,6 +6,21 @@ import { getRecommendations } from '@/api/recommendations'
 import type { NearbyPlace } from '@/types/api'
 import { getNearbyPlaces } from '@/api/maps'
 import { usePresence } from '@/composables/usePresence'
+import { useWeather } from '@/composables/useWeather'
+import WeatherIcon from '@/components/ui/WeatherIcon.vue'
+import { MapPin, RefreshCw } from 'lucide-vue-next'
+
+const { weather, fetchWeather } = useWeather()
+const refreshing = ref(false)
+
+async function refreshWeather() {
+  if (refreshing.value) return
+  refreshing.value = true
+  const lat = coords.value.latitude
+  const lng = coords.value.longitude
+  if (lat && lng) await fetchWeather(lat, lng)
+  refreshing.value = false
+}
 
 interface Props {
   center?: { lat: number; lng: number }
@@ -65,6 +80,7 @@ watch(
       map.setCenter(pos)
       hasInitialCenter = true
       loadPlaces(pos.lat, pos.lng)
+      fetchWeather(pos.lat, pos.lng)
     }
 
     if (!userMarker && AdvancedMarker && PinElementClass) {
@@ -234,6 +250,30 @@ function handleRecenter() {
 <template>
   <div class="relative w-full h-full">
     <div ref="mapRef" class="w-full h-full" />
+
+    <!-- Widget del tiempo -->
+    <div
+      v-if="weather"
+      class="absolute top-20 right-4 z-10 bg-black/70 backdrop-blur-md border border-white/20 rounded-2xl px-3 py-2 text-white shadow-card flex items-center gap-3"
+    >
+      <WeatherIcon :condition="weather.condition" :size="32" />
+      <div class="flex flex-col leading-tight">
+        <div class="text-2xl font-extralight">{{ weather.temp }}<span class="text-base">°</span></div>
+        <div class="flex items-center gap-1 text-xs text-white/60">
+          <MapPin :size="10" />
+          <span>{{ weather.city }}</span>
+        </div>
+        <div class="text-xs text-white/40 capitalize">{{ weather.description }}</div>
+      </div>
+      <button
+        type="button"
+        class="text-white/40 hover:text-white transition-colors p-0.5 rounded-full ml-1"
+        :class="{ 'animate-spin': refreshing }"
+        @click="refreshWeather"
+      >
+        <RefreshCw :size="13" />
+      </button>
+    </div>
 
     <button
       type="button"
