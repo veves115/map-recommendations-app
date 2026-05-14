@@ -9,21 +9,10 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseIconButton from '@/components/ui/BaseIconButton.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
+import { PLACE_CATEGORIES } from '@/utils/placeCategories'
 
-const PLACE_CATEGORIES = [
-  { value: 'restaurant', label: 'Restaurantes' },
-  { value: 'cafe', label: 'Cafés' },
-  { value: 'bar', label: 'Bares' },
-  { value: 'bakery', label: 'Panaderías' },
-  { value: 'museum', label: 'Museos' },
-  { value: 'park', label: 'Parques' },
-  { value: 'shopping_mall', label: 'Centros comerciales' },
-  { value: 'gym', label: 'Gimnasios' },
-  { value: 'tourist_attraction', label: 'Atracciones turísticas' },
-  { value: 'movie_theater', label: 'Cines' },
-  { value: 'night_club', label: 'Discotecas' },
-  { value: 'book_store', label: 'Librerías' },
-]
+
+
 
 const preferences = ref<Preference[]>([])
 const loading = ref(true)

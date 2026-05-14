@@ -180,7 +180,10 @@ import type { FriendLocation } from '@/composables/usePresence'
 import { relativeTime } from '@/utils/time'
 import { useUserSocket } from '@/composables/useUserSocket'
 import { Navigation } from 'lucide-vue-next'
+import { PLACE_CATEGORIES } from '@/utils/placeCategories'
 
+
+const PLACE_FILTERS = [{ value: null, label: 'Todo' }, ...PLACE_CATEGORIES]
 const placeDetails = ref<PlaceDetails | null>(null)
 const selectedFriend = ref<FriendLocation | null>(null)
 const { sendEmoji, onEmoji } = useUserSocket()
@@ -223,34 +226,10 @@ function sendEmojiToFriend(emoji: string) {
 }
 
 function handleFriendClick(friend: FriendLocation) {
-  console.log('HOMEVIEW recibe friend-click:', friend)
   selectedFriend.value = friend
   placeDetails.value = null
 }
 
-const PLACE_FILTERS = [
-  { value: null, label: 'Todo' },
-  { value: 'restaurant', label: 'Restaurantes' },
-  { value: 'cafe', label: 'Cafés' },
-  { value: 'bar', label: 'Bares' },
-  { value: 'museum', label: 'Museos' },
-  { value: 'park', label: 'Parques' },
-  { value: 'tourist_attraction', label: 'Turismo' },
-  { value: 'supermarket', label: 'Supermercados' },
-  { value: 'pharmacy', label: 'Farmacias' },
-  { value: 'atm', label: 'Cajeros' },
-  { value: 'gas_station', label: 'Gasolineras' },
-  { value: 'gym', label: 'Gimnasios' },
-  { value: 'hospital', label: 'Hospitales' },
-  { value: 'subway_station', label: 'Transporte' },
-  { value: 'movie_theater', label: 'Cines' },
-  { value: 'night_club', label: 'Clubs' },
-  { value: 'stadium', label: 'Estadios' },
-  { value: 'zoo', label: 'Zoológicos' },
-  { value: 'library', label: 'Bibliotecas' },
-  { value: 'beach', label: 'Playas' },
-  { value: 'bowling_alley', label: 'Boleras' },
-]
 
 const activeFilter = ref<string | null>(null)
 
