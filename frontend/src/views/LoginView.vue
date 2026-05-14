@@ -11,7 +11,7 @@
         <!-- Título -->
         <div class="text-center space-y-1">
           <h1 class="text-4xl font-bold text-white">Iniciar sesión</h1>
-          <p class="text-white/60">Bienvenido de vuelta</p>
+          <MorphingText :texts="['Descubre', 'Explora', 'Comparte', 'Recomienda', 'Conecta']" />
         </div>
 
         <!-- Formulario -->
@@ -57,6 +57,8 @@ import { getMe } from '@/api/auth'
 import CanvasRevealEffect from '@/components/ui/CanvasRevealEffect.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
+import MorphingText from '@/components/ui/MorphingText.vue'
+
 
 const email = ref('')
 const password = ref('')

@@ -8,7 +8,7 @@
       <div class="w-full max-w-sm space-y-6">
         <div class="text-center space-y-1">
           <h1 class="text-4xl font-bold text-white">Crear cuenta</h1>
-          <p class="text-white/60">Empieza a descubrir lugares</p>
+          <MorphingText :texts="['Descubre', 'Explora', 'Comparte', 'Recomienda', 'Conecta']" />
         </div>
 
         <form @submit.prevent="handleRegister" class="space-y-4">
@@ -51,6 +51,8 @@ import { useAuthStore } from '@/stores/auth'
 import CanvasRevealEffect from '@/components/ui/CanvasRevealEffect.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import MorphingText from '@/components/ui/MorphingText.vue'
+
 
 const email = ref('')
 const password = ref('')
