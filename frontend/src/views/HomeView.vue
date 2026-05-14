@@ -236,6 +236,20 @@ const PLACE_FILTERS = [
   { value: 'museum', label: 'Museos' },
   { value: 'park', label: 'Parques' },
   { value: 'tourist_attraction', label: 'Turismo' },
+  { value: 'supermarket', label: 'Supermercados' },
+  { value: 'pharmacy', label: 'Farmacias' },
+  { value: 'atm', label: 'Cajeros' },
+  { value: 'gas_station', label: 'Gasolineras' },
+  { value: 'gym', label: 'Gimnasios' },
+  { value: 'hospital', label: 'Hospitales' },
+  { value: 'subway_station', label: 'Transporte' },
+  { value: 'movie_theater', label: 'Cines' },
+  { value: 'night_club', label: 'Clubs' },
+  { value: 'stadium', label: 'Estadios' },
+  { value: 'zoo', label: 'Zoológicos' },
+  { value: 'library', label: 'Bibliotecas' },
+  { value: 'beach', label: 'Playas' },
+  { value: 'bowling_alley', label: 'Boleras' },
 ]
 
 const activeFilter = ref<string | null>(null)
