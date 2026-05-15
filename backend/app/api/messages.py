@@ -83,3 +83,17 @@ def mark_message_as_read(
         )
 
     return MessageService.mark_as_read(db, message)
+
+@router.delete("/{user_id}", status_code=status.HTTP_200_OK)
+def delete_conversation(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    deleted = MessageService.delete_conversation(
+        db,
+        current_user_id=current_user.id,
+        other_user_id=user_id,
+    )
+    return {"deleted": deleted}
+

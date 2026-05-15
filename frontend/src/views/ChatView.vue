@@ -1,10 +1,10 @@
 <template>
   <div class="h-screen bg-black text-white flex flex-col overflow-hidden">
     <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-20">
-  <div class="w-[600px] max-w-full">
-    <GlobePulse />
-  </div>
-</div>
+      <div class="w-[600px] max-w-full">
+        <GlobePulse />
+      </div>
+    </div>
     <UserMenu />
 
     <!-- Header -->
@@ -54,13 +54,22 @@
 
       <!-- Chat conversation -->
       <div v-else class="flex-1 flex flex-col gap-3 min-h-0">
-        <button
-          type="button"
-          class="text-sm text-white/60 hover:text-white text-left"
-          @click="selectedUser = null"
-        >
-          ← Atrás
-        </button>
+        <div class="flex items-center justify-between">
+          <button
+            type="button"
+            class="text-sm text-white/60 hover:text-white text-left"
+            @click="selectedUser = null"
+          >
+            ← Atrás
+          </button>
+          <button
+            type="button"
+            class="text-sm text-red-400/70 hover:text-red-400 transition-colors"
+            @click="confirmDeleteOpen = true"
+          >
+            Borrar conversación
+          </button>
+        </div>
 
         <BaseCard variant="glass" padding="none" class="flex-1 flex flex-col min-h-0">
           <!-- Messages -->
@@ -103,6 +112,15 @@
         </BaseCard>
       </div>
     </div>
+    <ConfirmDialog
+      v-model:open="confirmDeleteOpen"
+      title="¿Borrar conversación?"
+      message="Se eliminarán todos los mensajes. Esta acción no se puede deshacer."
+      confirm-text="Borrar"
+      variant="danger"
+      :loading="deleting"
+      @confirm="handleDeleteConversation"
+    />
   </div>
 </template>
 
@@ -116,6 +134,8 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import UserMenu from '@/components/layout/UserMenu.vue'
 import GlobePulse from '@/components/ui/GlobePulse.vue'
+import { deleteConversation } from '@/api/messages'
+import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 
 const authStore = useAuthStore()
 const users = ref<User[]>([])
@@ -123,6 +143,8 @@ const loadingUsers = ref(true)
 const selectedUser = ref<User | null>(null)
 const draft = ref('')
 const messagesEl = ref<HTMLDivElement | null>(null)
+const confirmDeleteOpen = ref(false)
+const deleting = ref(false)
 
 const otherUsers = computed(() => users.value.filter((u) => u.id !== authStore.user?.id))
 
@@ -138,6 +160,20 @@ function handleSend() {
   if (!content) return
   send(content)
   draft.value = ''
+}
+
+async function handleDeleteConversation() {
+  if (!selectedUser.value) return
+  deleting.value = true
+  try {
+    await deleteConversation(selectedUser.value.id)
+    messages.value.splice(0)
+    confirmDeleteOpen.value = false
+  } catch (err) {
+    console.error('Error borrando conversación:', err)
+  } finally {
+    deleting.value = false
+  }
 }
 
 // Auto-scroll al fondo cuando llegan mensajes
