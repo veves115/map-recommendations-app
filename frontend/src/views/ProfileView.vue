@@ -1,5 +1,10 @@
 <template>
-  <div class="min-h-screen bg-black text-white">
+  <div class="relative min-h-screen bg-black text-white overflow-hidden">
+    <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-20">
+      <div class="w-[600px] max-w-full">
+        <GlobePulse />
+      </div>
+    </div>
     <UserMenu />
 
     <div class="max-w-2xl mx-auto px-4 py-12 space-y-8">
@@ -19,12 +24,11 @@
       <SecurityCard />
 
       <!-- Preferences -->
-      <PreferencesCard /> 
+      <PreferencesCard />
       <!-- Zona de peligro -->
       <DangerZoneCard />
     </div>
   </div>
-
 </template>
 
 <script setup lang="ts">
@@ -34,5 +38,5 @@ import PrivacyCard from '@/components/profile/PrivacyCard.vue'
 import SecurityCard from '@/components/profile/SecurityCard.vue'
 import PreferencesCard from '@/components/profile/PreferencesCard.vue'
 import DangerZoneCard from '@/components/profile/DangerZoneCard.vue'
+import GlobePulse from '@/components/ui/GlobePulse.vue'
 </script>
-
