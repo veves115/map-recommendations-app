@@ -10,6 +10,7 @@ import { useWeather } from '@/composables/useWeather'
 import WeatherIcon from '@/components/ui/WeatherIcon.vue'
 import { MapPin, RefreshCw } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
+import MapTypeSelector from '@/components/map/MapTypeSelector.vue'
 
 const authStore = useAuthStore()
 const { weather, fetchWeather } = useWeather()
@@ -162,6 +163,11 @@ el.textContent = (f.username ?? '?').charAt(0).toUpperCase()
   { deep: true },
 )
 
+watch(mapType, (type) => {
+  applyMapType(type)
+})
+
+
 onMounted(async () => {
   if (!mapRef.value) return
 
@@ -190,9 +196,7 @@ onMounted(async () => {
   })
   applyMapType(mapType.value, props.zoom)
 
-  watch(mapType, (type) => {
-    applyMapType(type)
-  })
+  
 
   loadPlaces(props.center.lat, props.center.lng)
 })
@@ -283,25 +287,9 @@ function handleRecenter() {
       <span class="text-xl">📍</span>
     </button>
     <!-- Selector de tipo de mapa -->
-    <div
-      class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex gap-1 bg-black/80 backdrop-blur-md border border-white/20 rounded-full p-1"
-    >
-      <button
-        v-for="option in [
-          { value: 'auto', label: 'Auto' },
-          { value: 'roadmap', label: 'Mapa' },
-          { value: 'hybrid', label: 'Satélite' },
-        ] as const"
-        :key="option.value"
-        type="button"
-        :class="[
-          'px-3 py-1 rounded-full text-xs font-medium transition-colors',
-          mapType === option.value ? 'bg-white text-black' : 'text-white/70 hover:text-white',
-        ]"
-        @click="mapType = option.value"
-      >
-        {{ option.label }}
-      </button>
-    </div>
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+  <MapTypeSelector v-model="mapType" />
+</div>
+
   </div>
 </template>
