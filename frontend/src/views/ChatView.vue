@@ -1,5 +1,10 @@
 <template>
   <div class="h-screen bg-black text-white flex flex-col overflow-hidden">
+    <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-20">
+  <div class="w-[600px] max-w-full">
+    <GlobePulse />
+  </div>
+</div>
     <UserMenu />
 
     <!-- Header -->
@@ -110,6 +115,7 @@ import type { User, Message } from '@/types/api'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import UserMenu from '@/components/layout/UserMenu.vue'
+import GlobePulse from '@/components/ui/GlobePulse.vue'
 
 const authStore = useAuthStore()
 const users = ref<User[]>([])

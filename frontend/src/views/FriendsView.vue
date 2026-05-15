@@ -12,6 +12,8 @@ import { createInvite, deleteInvite } from '@/api/friendships'
 import BaseIconButton from '@/components/ui/BaseIconButton.vue'
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue'
 import { removeFriend } from '@/api/friendships'
+import GlobePulse from '@/components/ui/GlobePulse.vue'
+
 
 const creatingInvite = ref(false)
 const copiedKey = ref<string | null>(null) // 'code-1', 'link-1', etc.
@@ -164,7 +166,13 @@ function formatDate(iso: string): string {
 </script>
 
 <template>
-  <div class="min-h-screen bg-black text-white">
+  <div class="relative min-h-screen bg-black text-white overflow-hidden">
+    <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-20">
+      <div class="w-[600px] max-w-full">
+        <GlobePulse />
+      </div>
+    </div>
+
     <UserMenu />
 
     <div class="max-w-2xl mx-auto px-4 py-12 space-y-8">

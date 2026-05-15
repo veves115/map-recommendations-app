@@ -20,6 +20,7 @@
     "@vueuse/core": "^14.2.1",
     "@vueuse/motion": "^3.0.3",
     "axios": "^1.14.0",
+    "cobe": "^2.0.1",
     "lucide-vue-next": "^1.0.0",
     "pinia": "^3.0.4",
     "three": "^0.184.0",
