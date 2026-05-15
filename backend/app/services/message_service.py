@@ -100,3 +100,26 @@ class MessageService:
         db.commit()
         db.refresh(message)
         return message
+    
+    @staticmethod
+    def delete_conversation(
+        db: Session,
+        current_user_id: int,
+        other_user_id: int,
+    ) -> int:
+        deleted = (
+            db.query(Message)
+            .filter(
+                (
+                    (Message.sender_id == current_user_id) &
+                    (Message.receiver_id == other_user_id)
+                ) | (
+                    (Message.sender_id == other_user_id) &
+                    (Message.receiver_id == current_user_id)
+                )
+            )
+            .delete(synchronize_session=False)
+        )
+        db.commit()
+        return deleted
+

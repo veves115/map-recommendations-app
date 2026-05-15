@@ -19,3 +19,7 @@ export const sendMessage = (data: MessageCreate) => {
 export const markAsRead = (messageId: number) => {
   return apiClient.patch<Message>(`api/v1/messages/${messageId}/read`)
 }
+
+export const deleteConversation = (userId: number) => {
+  return apiClient.delete<{ deleted: number }>(`api/v1/messages/${userId}`)
+}
