@@ -1,359 +1,287 @@
-# Map Recommendations API
+# ExploreNow
 
-A real-time location-based recommendations API built with FastAPI. The goal is to provide personalized place recommendations based on user preferences and enable social features like chat between users.
-
-## Project Vision
-
-- **Real-time map** with location recommendations
-- **Personalized suggestions** based on user likes and preferences
-- **WebSocket chat** to exchange place recommendations with other users
-- **Google Maps integration** for discovering interesting places
+Aplicación web fullstack de recomendaciones de lugares basada en un mapa interactivo, con sistema de amigos, chat en tiempo real y compartición de ubicación GPS.
 
 ---
 
-## Current Status
+## Stack tecnológico
 
-### Implemented
-
-- [x] User authentication (register, login, JWT tokens)
-- [x] User management (list, get by ID)
-- [x] Database models (User, Location, Preference, Message)
-- [x] Google Maps service (nearby places, place details, geocoding)
-- [x] Security (password hashing, JWT validation)
-
-### Pending
-
-- [ ] Maps API endpoints
-- [ ] Preferences CRUD endpoints
-- [ ] Location tracking endpoints
-- [ ] Recommendation engine
-- [ ] WebSocket chat implementation
-- [ ] Real-time location sharing
-
----
-
-## Tech Stack
-
-| Technology | Purpose |
-|------------|---------|
-| **FastAPI** | Modern async web framework |
-| **SQLAlchemy** | ORM for database operations |
-| **SQLite** | Database (dev) / PostgreSQL (prod ready) |
-| **python-jose** | JWT token generation and validation |
-| **passlib + bcrypt** | Secure password hashing |
-| **Google Maps API** | Places, geocoding, place details |
-| **WebSockets** | Real-time communication (ready) |
-| **Pydantic** | Data validation and serialization |
+| Capa | Tecnología |
+|------|-----------|
+| Backend | FastAPI + Python 3.11 |
+| ORM | SQLAlchemy 2.x + Alembic |
+| Base de datos | PostgreSQL 16 |
+| Auth | JWT (python-jose) + bcrypt (passlib) |
+| Tiempo real | WebSockets nativos de FastAPI |
+| Mapas (backend) | Google Maps Python SDK |
+| Frontend | Vue 3.5 + TypeScript + Vite |
+| Estado global | Pinia |
+| Estilos | Tailwind CSS v4 |
+| HTTP | Axios con interceptores JWT |
+| Mapas (frontend) | Google Maps JS API (AdvancedMarkerElement) |
+| APIs externas | Google Maps Platform + OpenWeatherMap |
+| Contenedores | Docker + Docker Compose |
 
 ---
 
-## Project Structure
+## Funcionalidades
+
+- Autenticación con JWT (registro, login, cambio de contraseña, eliminación de cuenta)
+- Mapa interactivo centrado en la ubicación GPS del usuario
+- Recomendaciones personalizadas de lugares según preferencias del usuario
+- Filtros por categoría (restaurantes, cafés, museos, parques, etc.)
+- Detalles de lugares: rating, horarios, reseñas, teléfono, web, ruta
+- Widget del tiempo en tiempo real (OpenWeatherMap)
+- Selector de tipo de mapa (Auto / Calles / Satélite) con previews reales
+- Sistema de amigos por código de invitación único
+- Compartición de ubicación en tiempo real entre amigos
+- Envío de emojis en tiempo real entre amigos
+- Chat persistente con historial en base de datos
+- Gestión de preferencias de lugares en el perfil
+
+---
+
+## Estructura del proyecto
 
 ```
 map-recommendations-app/
-├── app/
-│   ├── api/                    # API route handlers
-│   │   ├── auth.py             # Authentication endpoints
-│   │   ├── users.py            # User management endpoints
-│   │   └── maps.py             # Maps endpoints (pending)
-│   │
-│   ├── core/                   # Core infrastructure
-│   │   ├── config.py           # App settings and env variables
-│   │   ├── database.py         # SQLAlchemy engine and session
-│   │   ├── security.py         # Password hashing, JWT functions
-│   │   └── deps.py             # Dependency injection (auth)
-│   │
-│   ├── models/                 # SQLAlchemy ORM models
-│   │   ├── user.py             # User model
-│   │   ├── location.py         # Location model
-│   │   ├── preference.py       # Preference model
-│   │   └── message.py          # Message model
-│   │
-│   ├── schemas/                # Pydantic validation schemas
-│   │   ├── user.py             # User schemas
-│   │   ├── location.py         # Location schemas
-│   │   ├── preference.py       # Preference schemas
-│   │   └── message.py          # Message schemas
-│   │
-│   ├── services/               # Business logic layer
-│   │   ├── auth_service.py     # Authentication logic
-│   │   ├── user_service.py     # User operations
-│   │   └── maps_services.py    # Google Maps API wrapper
-│   │
-│   └── main.py                 # FastAPI application entry point
-│
-├── .env                        # Environment variables (not in git)
-├── .gitignore                  # Git ignore patterns
-├── requirements.txt            # Python dependencies
-├── app.db                      # SQLite database file
-└── README.md                   # This file
+├── backend/
+│   ├── alembic/              # Migraciones de base de datos
+│   ├── app/
+│   │   ├── api/              # Routers FastAPI (auth, users, maps, preferences,
+│   │   │                     #   locations, recommendations, messages, friendships)
+│   │   ├── core/             # Config, database, security, deps
+│   │   ├── models/           # Modelos SQLAlchemy
+│   │   ├── schemas/          # Schemas Pydantic
+│   │   ├── services/         # Lógica de negocio
+│   │   └── websocket/        # Chat y presencia en tiempo real
+│   ├── Dockerfile
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── api/              # Wrappers Axios por recurso
+│   │   ├── components/       # ui/, map/, layout/, profile/
+│   │   ├── composables/      # useChat, usePresence, useWeather, useUserSocket
+│   │   ├── router/           # Vue Router con guard requiresAuth
+│   │   ├── stores/           # Pinia (auth)
+│   │   ├── types/            # Tipos TypeScript de la API
+│   │   ├── utils/            # placeCategories, time, api-errors
+│   │   └── views/            # HomeView, ProfileView, ChatView, FriendsView, ...
+│   ├── package.json
+│   └── vite.config.ts
+├── docker-compose.yml
+└── .env                      # Variables de entorno (no en git)
 ```
 
 ---
 
-## Database Models
+## Variables de entorno
 
-### User
-Stores user account information.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Integer | Primary key |
-| email | String | Unique email address |
-| username | String | Unique username |
-| hashed_password | String | Bcrypt hashed password |
-| is_active | Boolean | Account status (default: true) |
-| created_at | DateTime | Registration timestamp |
-
-**Relationships:** preferences, locations, sent_messages, received_messages
-
-### Location
-Stores user location history.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Integer | Primary key |
-| user_id | Integer | Foreign key to User |
-| latitude | Float | GPS latitude |
-| longitude | Float | GPS longitude |
-| timestamp | DateTime | When location was recorded |
-| place_name | String | Optional place name |
-
-### Preference
-Stores user interests for recommendations.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Integer | Primary key |
-| user_id | Integer | Foreign key to User |
-| category | String | Main category (restaurants, museums, parks) |
-| subcategory | String | Specific preference (italian food, modern art) |
-
-### Message
-Stores chat messages between users.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | Integer | Primary key |
-| sender_id | Integer | Foreign key to User (sender) |
-| receiver_id | Integer | Foreign key to User (receiver) |
-| content | String | Message text |
-| timestamp | DateTime | When message was sent |
-| is_read | Boolean | Read status (default: false) |
-
----
-
-## API Endpoints
-
-### Authentication `/api/v1/auth`
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| POST | `/register` | No | Create new user account |
-| POST | `/login` | No | Get JWT access token |
-| GET | `/me` | Yes | Get current user info |
-
-### Users `/api/v1/users`
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/` | Yes | List all users (paginated) |
-| GET | `/{user_id}` | Yes | Get user by ID |
-
-### Maps `/api/v1/maps` (Pending)
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/nearby` | Yes | Get nearby places |
-| GET | `/place/{place_id}` | Yes | Get place details |
-| GET | `/geocode` | Yes | Convert address to coordinates |
-
-### Preferences (Pending)
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/preferences` | Yes | Get user preferences |
-| POST | `/preferences` | Yes | Add a preference |
-| DELETE | `/preferences/{id}` | Yes | Remove a preference |
-
-### Messages / Chat (Pending)
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| WS | `/ws/chat` | Yes | WebSocket chat connection |
-| GET | `/messages/{user_id}` | Yes | Get message history |
-
----
-
-## Services
-
-### AuthService
-Handles user authentication and token creation.
-
-```python
-authenticate_user(db, credentials)  # Verify email/password
-create_token(user_email)            # Generate JWT token
-```
-
-### UserService
-Handles user CRUD operations.
-
-```python
-get_user_by_email(db, email)        # Find user by email
-get_user_by_username(db, username)  # Find user by username
-get_user_by_id(db, user_id)         # Find user by ID
-create_user(db, user_data)          # Create new user
-get_all_users(db, skip, limit)      # List users with pagination
-```
-
-### MapsService
-Wrapper for Google Maps API.
-
-```python
-get_nearby_places(lat, lng, radius, place_type, keyword)
-# Returns: place_id, name, address, types, rating, location, open_now, photos
-
-get_place_details(place_id)
-# Returns: name, address, phone, website, rating, price_level, hours, reviews
-
-geocode_address(address)
-# Returns: formatted_address, location (lat/lng), place_id
-```
-
----
-
-## Setup and Installation
-
-### Prerequisites
-- Python 3.10+
-- Google Maps API key
-
-### Installation
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd map-recommendations-app
-
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# Linux/Mac:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### Environment Variables
-
-Create a `.env` file in the root directory:
+Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
 
 ```env
 # Google Maps
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 
-# Database
-DATABASE_URL=sqlite:///./app.db
+# Base de datos
+DATABASE_URL=postgresql://postgres:postgres@db:5432/mapapp
 
-# JWT Configuration
-SECRET_KEY=your_secret_key_here
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+# JWT
+SECRET_KEY=your_secret_key_here   # genera con: openssl rand -hex 32
+
+# CORS (orígenes permitidos separados por coma)
+CORS_ORIGINS=http://localhost:5173,http://localhost:5174
+
+# Email (Resend)
+RESEND_API_KEY=your_resend_api_key
+FRONTEND_URL=http://localhost:5173
 ```
 
-### Run the Server
+Crea también `frontend/.env`:
+
+```env
+VITE_API_URL=http://localhost:8000
+VITE_GOOGLE_MAPS_KEY=your_google_maps_api_key
+VITE_OPENWEATHER_KEY=your_openweathermap_api_key
+```
+
+### Cómo obtener las API keys
+
+- **Google Maps**: [console.cloud.google.com](https://console.cloud.google.com) — activa Maps JavaScript API y Places API
+- **OpenWeatherMap**: [openweathermap.org/api](https://openweathermap.org/api) — plan gratuito suficiente
+- **Resend**: [resend.com](https://resend.com) — para emails de recuperación de contraseña (plan gratuito)
+
+---
+
+## Despliegue con Docker (recomendado)
+
+### Requisitos
+- Docker Desktop instalado y en ejecución
+- Archivo `.env` en la raíz con las variables descritas arriba
+
+### Levantar el proyecto
 
 ```bash
+git clone https://github.com/veves115/map-recommendations-app.git
+cd map-recommendations-app
+
+# Crear el .env con tus variables (ver sección anterior)
+
+docker compose up --build
+```
+
+Servicios disponibles tras el arranque:
+
+| Servicio | URL |
+|----------|-----|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:8000 |
+| Docs Swagger | http://localhost:8000/docs |
+| PostgreSQL | localhost:5432 (usuario: `postgres`, contraseña: `postgres`, db: `mapapp`) |
+
+### Parar el proyecto
+
+```bash
+docker compose down
+```
+
+### Parar y eliminar datos (reset completo)
+
+```bash
+docker compose down -v
+```
+
+---
+
+## Migraciones de base de datos
+
+Las migraciones se aplican automáticamente al arrancar con Docker. Para ejecutarlas manualmente:
+
+```bash
+# Dentro del contenedor
+docker compose exec backend alembic upgrade head
+
+# Crear una nueva migración
+docker compose exec backend alembic revision --autogenerate -m "descripción"
+
+# Revertir última migración
+docker compose exec backend alembic downgrade -1
+```
+
+---
+
+## Desarrollo sin Docker
+
+### Backend
+
+```bash
+cd backend
+python -m venv venv
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-The API will be available at `http://localhost:8000`
-
-### API Documentation
-
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
----
-
-## Usage Examples
-
-### Register a User
+### Frontend
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@example.com",
-    "username": "johndoe",
-    "password": "securepassword123"
-  }'
+cd frontend
+npm install
+npm run dev
 ```
 
-### Login
+> En PowerShell puede ser necesario ejecutar primero:
+> `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
+
+### Comandos útiles del frontend
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "user@example.com",
-    "password": "securepassword123"
-  }'
-```
-
-Response:
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "token_type": "bearer"
-}
-```
-
-### Access Protected Endpoint
-
-```bash
-curl http://localhost:8000/api/v1/auth/me \
-  -H "Authorization: Bearer <your_access_token>"
+npm run type-check   # Verificar tipos TypeScript
+npm run lint         # Linter
+npm run build        # Build de producción
 ```
 
 ---
 
-## Future Roadmap
+## API Endpoints
 
-### Phase 1: Core Features
-- [ ] Implement maps API endpoints
-- [ ] Add preference management endpoints
-- [ ] Create location tracking endpoints
+### Autenticación `/api/v1/auth`
 
-### Phase 2: Recommendations
-- [ ] Build recommendation algorithm
-- [ ] Match user preferences with nearby places
-- [ ] Implement rating and favorites system
+| Método | Endpoint | Auth | Descripción |
+|--------|----------|------|-------------|
+| POST | `/register` | No | Crear cuenta |
+| POST | `/login` | No | Obtener token JWT |
+| GET | `/me` | Sí | Datos del usuario actual |
+| POST | `/change-password` | Sí | Cambiar contraseña |
+| POST | `/forgot-password` | No | Solicitar reset por email |
+| POST | `/reset-password` | No | Resetear contraseña con token |
 
-### Phase 3: Social Features
-- [ ] WebSocket chat implementation
-- [ ] Real-time location sharing
-- [ ] Place sharing between users
-- [ ] Friend system
+### Usuarios `/api/v1/users`
 
-### Phase 4: Enhancements
-- [ ] Push notifications
-- [ ] Advanced filtering and search
-- [ ] User reviews and ratings
-- [ ] Route planning
+| Método | Endpoint | Auth | Descripción |
+|--------|----------|------|-------------|
+| GET | `/` | Sí | Listar usuarios |
+| GET | `/{id}` | Sí | Obtener usuario por ID |
+| PATCH | `/me` | Sí | Editar perfil |
+| DELETE | `/me` | Sí | Eliminar cuenta (soft delete) |
+
+### Mapas `/api/v1/maps`
+
+| Método | Endpoint | Auth | Descripción |
+|--------|----------|------|-------------|
+| GET | `/nearby` | Sí | Lugares cercanos |
+| GET | `/place/{place_id}` | Sí | Detalles de un lugar |
+| GET | `/geocode` | Sí | Geocodificación de dirección |
+
+### Preferencias `/api/v1/preferences`
+
+| Método | Endpoint | Auth | Descripción |
+|--------|----------|------|-------------|
+| GET | `/` | Sí | Listar preferencias del usuario |
+| POST | `/` | Sí | Añadir preferencia |
+| DELETE | `/{id}` | Sí | Eliminar preferencia |
+
+### Recomendaciones `/api/v1/recommendations`
+
+| Método | Endpoint | Auth | Descripción |
+|--------|----------|------|-------------|
+| GET | `/` | Sí | Lugares recomendados según preferencias y ubicación |
+
+### Mensajes `/api/v1/messages`
+
+| Método | Endpoint | Auth | Descripción |
+|--------|----------|------|-------------|
+| GET | `/{user_id}` | Sí | Historial de conversación |
+| POST | `/` | Sí | Enviar mensaje |
+| PATCH | `/{id}/read` | Sí | Marcar como leído |
+| DELETE | `/{user_id}` | Sí | Borrar conversación completa |
+
+### Amistades `/api/v1/friendships`
+
+| Método | Endpoint | Auth | Descripción |
+|--------|----------|------|-------------|
+| GET | `/` | Sí | Listar amigos |
+| POST | `/invites` | Sí | Crear invitación |
+| GET | `/invites` | Sí | Listar invitaciones propias |
+| GET | `/invites/received` | Sí | Invitaciones recibidas |
+| POST | `/invites/accept` | Sí | Aceptar invitación por código |
+| DELETE | `/invites/{id}` | Sí | Eliminar invitación |
+| DELETE | `/{friend_id}` | Sí | Eliminar amigo |
+
+### WebSockets
+
+| Protocolo | Endpoint | Descripción |
+|-----------|----------|-------------|
+| WS | `/ws/chat/{room_id}?token=...` | Chat en tiempo real |
+| WS | `/ws/presence?token=...` | Ubicación en tiempo real |
+| WS | `/ws/user?token=...` | Eventos de usuario (emojis) |
 
 ---
 
-## License
+## Autor
 
-This project is private and under development.
-
----
-
-## Author
-
-Created as a learning project for building real-time location-based applications with FastAPI.
+Proyecto desarrollado por [Pablo Ares](https://github.com/veves115) como Proyecto Intermodular de 2º DAW.
