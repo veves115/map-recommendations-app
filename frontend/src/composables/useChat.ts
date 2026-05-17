@@ -28,7 +28,7 @@ export function useChat(otherUserId: Ref<number | null>) {
     if (!authStore.user || !authStore.token) return
 
     const roomId = buildRoomId(authStore.user.id, otherId)
-    const wsUrl = import.meta.env.VITE_API_URL.replace(/^http/, 'ws')
+    const wsUrl = import.meta.env.VITE_API_URL.replace(/^http/, 'ws').replace(/\/$/, '')
     const url = `${wsUrl}/ws/chat/${roomId}?token=${authStore.token}`
 
     ws = new WebSocket(url)
